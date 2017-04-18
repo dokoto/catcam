@@ -1,0 +1,6 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+<script>
+    const ws = io.connect('ws://127.0.0.1/8002');
+    ws.on('streaming', data => document.getElementById('number').innerHTML = data.n);
+</script>
+<div style="border:1px solid #ccc" id="number">&nbsp;</div>
