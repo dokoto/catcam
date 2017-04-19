@@ -1,6 +1,69 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
-<script>
-    const ws = io.connect('ws://127.0.0.1/8002');
-    ws.on('streaming', data => document.getElementById('number').innerHTML = data.n);
-</script>
-<div style="border:1px solid #ccc" id="number">&nbsp;</div>
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+    </head>
+
+    <body>
+        <video id="camera" width="50%" controls></video>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+        <script>
+            ///const MIME_CODEC = 'video/webm; codecs="vp8"';
+            const MIME_CODEC = 'video/mp4; codecs="avc1.42C028"';
+            let mediaSource, video, queue = [];
+            if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
+                mediaSource = new MediaSource();
+                video = document.getElementById('camera');
+                video.src = window.URL.createObjectURL(mediaSource);
+                mediaSource.addEventListener('sourceopen', sourceOpen, false);
+                mediaSource.addEventListener('sourceend', sourceEnd, false);
+                mediaSource.addEventListener('sourceclose', sourceClose, false);
+            } else {
+                console.error('Unsupported MIME type or codec: ', mimeCodec);
+            }
+
+            function sourceEnd() {
+                console.log('>>>>>>>>>>>> SOURCE END');
+            }
+
+            function sourceClose() {
+                console.log('>>>>>>>>>>>> SOURCE CLOSE');
+            }
+
+            function sourceOpen() {
+                console.log('>>>>>>>>>>>> SOURCE OPEN');
+                const srcBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+                srcBuffer.mode = 'sequence';
+
+                srcBuffer.addEventListener('update', function() {
+                    if (queue.length > 0 && !srcBuffer.updating) {
+                        srcBuffer.appendBuffer(queue.shift());
+                    }
+                });
+
+                srcBuffer.addEventListener('updateend', function() {
+                    if (queue.length > 0 && !srcBuffer.updating) {
+                        srcBuffer.appendBuffer(queue.shift());
+                    }
+                });
+
+                srcBuffer.addEventListener('error', function(e) {
+                    //ws.close();
+                    console.warn(e);
+                });
+
+                const ws = io.connect('ws://127.0.0.1:8002');
+                ws.on('onChunk', function(buffer) {
+                    if (buffer.updating || queue.length > 0) {
+                        queue.push(buffer);
+                    } else {
+                        srcBuffer.appendBuffer(buffer);
+                        video.play();
+                    }
+                });
+            }
+        </script>
+    </body>
+
+</html>
