@@ -3,12 +3,15 @@
 // ffmpeg -rtbufsize 1500M -f dshow -framerate 25 -video_size 640x480 -i video="Integrated Camera" -vcodec libvpx -b:v 3500k -r 25 -crf 10 -quality realtime -speed 16 -threads 2 -an -g 25 -f webm http://127.0.0.1:8001
 // ffmpeg -rtbufsize 1500M -f dshow -framerate 25 -video_size 640x480 -i video="Integrated Camera"  -vcodec libx264 -profile:v main -g 25 -r 25 -b:v 500k -keyint_min 250 -strict experimental -pix_fmt yuv420p -movflags empty_moov+default_base_moof -an -preset ultrafast -f mp4 http://127.0.0.1:8001
 
-// **** https://github.com/kmoskwiak/node-tcp-streaming-server/tree/master/client/js
-// https://ricochen.wordpress.com/2011/10/14/learning-node-js-socket-io-a-simple-streaming-example/
-// https://github.com/phoboslab/jsmpeg/blob/master/websocket-relay.js
-// http://janganstop.com/news/HTML5-Live-Video-Streaming-via-WebSockets
-// https://github.com/websockets/ws
-// http://web-engineering.info/node/57
+
+/*
+ * https://developers.google.com/web/fundamentals/media/mse/basics
+ * TO CHECK
+ ** https://groups.google.com/a/chromium.org/forum/#!topic/chromium-html5/p2pFsHNaj-k
+ ** https://www.chromestatus.com/feature/4563797888991232
+ ** https://www.chromestatus.com/features/4563797888991232
+ ** http://html5-demos.appspot.com/static/media-source.html
+ */
 
 const http = require('http');
 const ws = require('socket.io')();

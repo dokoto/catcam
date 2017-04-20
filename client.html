@@ -9,7 +9,7 @@
         <video id="camera" width="50%" controls></video>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
         <script>
-            //const MIME_CODEC = 'video/webm; codecs="vp8"';
+            //const MIME_CODEC = 'video/webm; codecs="opus, vp8, vp9"';
             const MIME_CODEC = 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
             let mediaSource, video, queue = [];
             if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
@@ -19,8 +19,8 @@
                     video = document.getElementById('camera');
                     video.src = window.URL.createObjectURL(mediaSource);
 
-                    mediaSource.addEventListener('sourceopen', sourceOpenOnLive, false);
-                    //mediaSource.addEventListener('sourceopen', sourceOpenAjax, false);
+                    //mediaSource.addEventListener('sourceopen', sourceOpenOnLive, false);
+                    mediaSource.addEventListener('sourceopen', sourceOpenAjax, false);
 
                     mediaSource.addEventListener('sourceend', sourceEnd, false);
                     mediaSource.addEventListener('sourceclose', sourceClose, false);
@@ -72,21 +72,30 @@
                 });
             }
 
-            const VIDEO_TEST1 = 'http://localhost/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';
-            const VIDEO_TEST2 = 'http://localhost/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.mp4';
+            const VIDEO_TEST1 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';
+            const VIDEO_TEST2 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.mp4';
+            const VIDEO_TEST3 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.webm';
+
             function sourceOpenAjax() {
                 console.log('>>>>>>>>>>>> SOURCE OPEN');
                 var mediaSource = this;
                 console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                var sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
-                fetchAB(VIDEO_TEST2, function(buf) {
-                    sourceBuffer.addEventListener('updateend', function(_) {
-                        console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                        mediaSource.endOfStream();
-                        video.play();
+                try {
+                    var sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+                    sourceBuffer.mode = 'sequence';
+                    fetchAB(VIDEO_TEST1, function(buf) {
+                        sourceBuffer.addEventListener('updateend', function(_) {
+                            console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+                            if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
+                                mediaSource.endOfStream();
+                            }
+                            video.play();
+                        });
+                        sourceBuffer.appendBuffer(new Uint8Array(buf));
                     });
-                    sourceBuffer.appendBuffer(new Uint8Array(buf));
-                });
+                } catch (err) {
+                    console.error(err);
+                }
             }
 
             function fetchAB(url, cb) {
