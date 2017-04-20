@@ -9,16 +9,24 @@
         <video id="camera" width="50%" controls></video>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
         <script>
-            ///const MIME_CODEC = 'video/webm; codecs="vp8"';
-            const MIME_CODEC = 'video/mp4; codecs="avc1.42C028"';
+            //const MIME_CODEC = 'video/webm; codecs="vp8"';
+            const MIME_CODEC = 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
             let mediaSource, video, queue = [];
             if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
-                mediaSource = new MediaSource();
-                video = document.getElementById('camera');
-                video.src = window.URL.createObjectURL(mediaSource);
-                mediaSource.addEventListener('sourceopen', sourceOpen, false);
-                mediaSource.addEventListener('sourceend', sourceEnd, false);
-                mediaSource.addEventListener('sourceclose', sourceClose, false);
+                try {
+                    console.log('>>>>>>>>>>>> MEDIASOURCE DETECTED');
+                    mediaSource = new MediaSource();
+                    video = document.getElementById('camera');
+                    video.src = window.URL.createObjectURL(mediaSource);
+
+                    mediaSource.addEventListener('sourceopen', sourceOpenOnLive, false);
+                    //mediaSource.addEventListener('sourceopen', sourceOpenAjax, false);
+
+                    mediaSource.addEventListener('sourceend', sourceEnd, false);
+                    mediaSource.addEventListener('sourceclose', sourceClose, false);
+                } catch (err) {
+                    console.error(err);
+                }
             } else {
                 console.error('Unsupported MIME type or codec: ', mimeCodec);
             }
@@ -31,7 +39,7 @@
                 console.log('>>>>>>>>>>>> SOURCE CLOSE');
             }
 
-            function sourceOpen() {
+            function sourceOpenOnLive() {
                 console.log('>>>>>>>>>>>> SOURCE OPEN');
                 const srcBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
                 srcBuffer.mode = 'sequence';
@@ -49,20 +57,48 @@
                 });
 
                 srcBuffer.addEventListener('error', function(e) {
-                    //ws.close();
-                    console.warn(e);
+                    ws.close();
+                    console.error(e);
                 });
 
                 const ws = io.connect('ws://127.0.0.1:8002');
                 ws.on('onChunk', function(buffer) {
-                    if (buffer.updating || queue.length > 0) {
-                        queue.push(buffer);
+                    if (srcBuffer.updating || queue.length > 0) {
+                        queue.push(new Uint8Array(buffer));
                     } else {
-                        srcBuffer.appendBuffer(buffer);
+                        srcBuffer.appendBuffer(new Uint8Array(buffer));
                         video.play();
                     }
                 });
             }
+
+            const VIDEO_TEST1 = 'http://localhost/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';
+            const VIDEO_TEST2 = 'http://localhost/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.mp4';
+            function sourceOpenAjax() {
+                console.log('>>>>>>>>>>>> SOURCE OPEN');
+                var mediaSource = this;
+                console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+                var sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+                fetchAB(VIDEO_TEST2, function(buf) {
+                    sourceBuffer.addEventListener('updateend', function(_) {
+                        console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+                        mediaSource.endOfStream();
+                        video.play();
+                    });
+                    sourceBuffer.appendBuffer(new Uint8Array(buf));
+                });
+            }
+
+            function fetchAB(url, cb) {
+                console.log(url);
+                var xhr = new XMLHttpRequest;
+                xhr.open('get', url);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function() {
+                    cb(xhr.response);
+                };
+                xhr.send();
+            };
         </script>
     </body>
 
