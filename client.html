@@ -16,6 +16,7 @@
             //const MIME_CODEC = 'video/webm; codecs="vorbis,vp8"';
             //const MIME_CODEC = 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
             const NUM_CHUNKS = 5;
+            const WS_HOST = 'ws://192.168.77.3:8001';
 
             let mediaSource, video, queue = [];
             if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC_CHROME_ALIVE)) {
@@ -68,7 +69,7 @@
                     console.error(e);
                 });
 
-                const ws = io.connect('ws://127.0.0.1:8002');
+                const ws = io.connect(WS_HOST);
                 ws.on('onChunk', function(buffer) {
                     if (srcBuffer.updating || queue.length > 0) {
                         queue.push(new Uint8Array(buffer));

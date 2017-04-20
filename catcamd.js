@@ -18,15 +18,24 @@
 const http = require('http');
 const ws = require('socket.io')();
 const exec = require('child_process').exec;
+const ifs = require('os').networkInterfaces();
 
 const WEBSOCKET_PORT = 8002;
 const STREAM_PORT = 8001;
+const LOCAL_IP = Object.keys(ifs)
+      .map(x => ifs[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
+        .filter(x => x)[0].address;
+
 const FFMPEG_CMD_MP4 = 'ffmpeg -rtbufsize 1500M -f dshow -framerate 25 -video_size 640x480 -i video="Integrated Camera"  -vcodec libx264 -profile:v main -g 25 -r 25 -b:v 500k -keyint_min 250 -strict experimental -pix_fmt yuv420p -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -an -preset ultrafast -f mp4 http://127.0.0.1:8001';
 const FFMPEG_CMD_WEBM = 'ffmpeg -rtbufsize 1500M -f dshow -framerate 25 -video_size 640x480 -i video="Integrated Camera" -vcodec libvpx -b:v 3500k -r 25 -crf 10 -quality realtime -speed 16 -threads 2 -an -g 25 -f webm http://127.0.0.1:8001';
 
+const FFMPEG_CMD_MP4_LINUX = 'ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0  -vcodec libx264 -profile:v main -g 25 -r 25 -b:v 500k -keyint_min 250 -strict experimental -pix_fmt yuv420p -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -an -preset ultrafast -f mp4 http://127.0.0.1:8001';
+
+const FFMPEG_CMD_WEBM_LINUX = 'ffmpeg  -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0 -vcodec libvpx -b:v 3500k -r 25 -crf 10 -quality realtime -speed 16 -threads 2 -an -g 25 -f webm http://127.0.0.1:8001';
+
 ws.on('connection', sockConn => {
     console.log('New WebSocket Connection: ', sockConn.conn.remoteAddress, sockConn.client.request.headers['user-agent']);
-    exec(FFMPEG_CMD_WEBM, (error, stdout, stderr) => {
+    exec(FFMPEG_CMD_WEBM_LINUX, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             return;
@@ -57,5 +66,5 @@ const httpServer = http.createServer((req, res) => {
 }).listen(STREAM_PORT);
 
 
-console.log('Listening for incomming MPEG-TS Stream on http://127.0.0.1:' + STREAM_PORT);
-console.log('Awaiting WebSocket connections on ws://127.0.0.1:' + WEBSOCKET_PORT + '/');
+console.log('Listening for incomming MPEG-TS Stream on http://%s:%d', LOCAL_IP, STREAM_PORT);
+console.log('Awaiting WebSocket connections on ws://%s:%d/', LOCAL_IP, WEBSOCKET_PORT);
