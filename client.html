@@ -6,20 +6,19 @@
     </head>
 
     <body>
-        <video id="camera" width="50%" controls autoplay></video>
+        <video id="camera" width="100%" autoplay></video>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
         <script>
             /*
              * Chrome: MIME_CODEC tiene que ser muy exacto sino chrome da un error
              */
-            const MIME_CODEC_CHROME_ALIVE = 'video/webm; codecs="vp8"';
-            //const MIME_CODEC = 'video/webm; codecs="vorbis,vp8"';
-            //const MIME_CODEC = 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
-            const NUM_CHUNKS = 5;
-            const WS_HOST = 'ws://192.168.77.3:8001';
+            const MIME_CODEC_WEBM = 'video/webm; codecs="vp8"';
+            const MIME_CODEC_MP4= 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
+            const MIME_CODEC = MIME_CODEC_WEBM;
+            const WS_HOST = 'ws://10.80.80.28:8002';
 
             let mediaSource, video, queue = [];
-            if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC_CHROME_ALIVE)) {
+            if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
                 try {
                     console.log('>>>>>>>>>>>> MEDIASOURCE DETECTED');
                     mediaSource = new MediaSource();
