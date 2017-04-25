@@ -1,0 +1,63 @@
+{
+  "name": "catcam",
+  "version": "0.0.1",
+  "description": "Broadcast cat video/audio on live",
+  "main": "catcamd.js",
+  "scripts": {
+    "debug": "node --inspect-brk catcamd.js",
+    "test": "node ./scripts/webpackOnLiveServer",
+    "buildWeb": "webpack --config ./scripts/webpack.prod.config.js --progress --profile --colors",
+    "parse": "eslint ."
+  },
+  "keywords": [
+    "webcam",
+    "streaming",
+    "video",
+    "live"
+  ],
+  "author": "dokoto.moloko@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "file-loader": "^0.11.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-hot-loader": "^3.0.0-beta.6",
+    "react-redux": "^5.0.4",
+    "react-router": "^4.1.1",
+    "react-router-redux": "^4.0.8",
+    "redux-devtools": "^3.3.2",
+    "redux-devtools-dock-monitor": "^1.1.1",
+    "redux-devtools-log-monitor": "^1.2.0",
+    "redux": "^3.6.0",
+    "socket.io": "^1.7.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.7.7",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.0.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "css-loader": "^0.28.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.9.0",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "html-webpack-plugin": "^2.28.0",
+    "json-loader": "^0.5.4",
+    "node-sass": "^4.5.2",
+    "postcss-loader": "^1.3.3",
+    "react-addons-test-utils": "^15.5.1",
+    "sass-loader": "^6.0.3",
+    "stats-webpack-plugin": "^0.6.0",
+    "style-loader": "^0.16.1",
+    "url-loader": "^0.5.8",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.4"
+  }
+}
