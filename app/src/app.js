@@ -8,9 +8,7 @@ const render = (Component) => {
   ReactDOM.render(
     <AppContainer>
       <Component />
-    </AppContainer>,
-    document.getElementById('root'),
-);
+    </AppContainer>, document.getElementById('root'));
 };
 
 render(Root);
