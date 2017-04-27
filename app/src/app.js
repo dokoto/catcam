@@ -1,16 +1,18 @@
 import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Provider from 'react-redux';
-import Root from './modules/root/root.container';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import reducers from './modules/root/root_reducers';
+import Router from './modules/root/root_router';
+import logger from './helpers/logger';
 
-const render = Component => {
-  ReactDOM.render(
-    <Provider>
-      <Component />
-    </Provider>,
-    document.getElementById('root')
-  );
-};
+const store = createStore(reducers, applyMiddleware(thunk, logger));
 
-render(Root);
+ReactDOM.render(
+  <Provider store={ store }>
+    <Router />
+  </Provider>,
+  document.getElementById('root')
+);

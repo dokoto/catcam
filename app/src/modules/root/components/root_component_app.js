@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router';
-import { container, footer } from '../styles/root.scss';
+import { Link } from 'react-router-redux';
+import { container, footer } from '../root_styles.scss';
 
 const App = () => (
   <div className={ container }>
