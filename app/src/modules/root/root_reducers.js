@@ -2,7 +2,7 @@ import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 import * as rootActions from './root_actions';
 
-const initApp = (state = '', action) => {
+const initApp = (state = {}, action) => {
   switch (action.type) {
     case rootActions.INIT_APP:
       return [...state, {
@@ -10,7 +10,10 @@ const initApp = (state = '', action) => {
         count: this.state.count + 1,
       }];
     default:
-      return state;
+      return [...state, {
+        date: new Date(),
+        count: 1,
+      }];
   }
 };
 
