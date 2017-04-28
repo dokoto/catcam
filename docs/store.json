@@ -1,0 +1,30 @@
+{
+  "date": "01/01/2017",
+  "count": 0,
+  "auth" : {
+    "isFetching": false,
+    "isAuthenticated": false,
+    "id_token": "",
+    "creds": "",
+    "message": ""
+  },
+  "stream" : {
+    "active": false,
+    "type": "webcam",
+    "sources": {
+      "cam1": {
+        "id": "cam1",
+        "resolutions": ["800x600", "1280x800"],
+        "type": "webcam"
+      },
+      "cam2": {
+        "id": "cam1",
+        "resolutions": ["800x600", "1280x800"],
+        "type": "webcam"
+        }
+    },
+    "id": "cam1",
+    "resolution": "1280x800",
+    "orientation": "portrait"
+  }
+}
