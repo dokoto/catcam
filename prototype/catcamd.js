@@ -117,7 +117,7 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `http://${ PUBLIC_IP }:${ HTTP_PORT }/auth/google/callback`,
+      callbackURL: `https://${ PUBLIC_IP }:${ HTTP_PORT }/auth/google/callback`,
       passReqToCallback: true,
     },
     function(request, accessToken, refreshToken, profile, done) {
