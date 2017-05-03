@@ -12,7 +12,7 @@
  ** http://html5-demos.appspot.com/static/media-source.html
  */
 
-const http = require('http');
+const https = require('https');
 const express = require('express');
 const passport = require('passport');
 const session = require('express-session');
@@ -20,16 +20,16 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mongoDBStore = require('connect-mongodb-session')(session);
-
+const fs = require('fs');
 const ws = require('socket.io')();
 const spawn = require('child_process').spawn;
 const ifs = require('os').networkInterfaces();
 
-const GOOGLE_CLIENT_ID = '702802836349-mskkrk139ffvqr73gb9vc8bfsh5ai3mk.apps.googleusercontent.com';
-const GOOGLE_CLIENT_SECRET = 'Rk88u2lHxTNEW41vD6PmkwKq';
+const GOOGLE_CLIENT_ID = '702802836349-cmpihi89o5pp2mh85cl8t06g2k9jmjuu.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = '7v7XQ2fl-PfvMBSwGrfdMqDP';
 const WEBSOCKET_PORT = 8002;
 const HTTP_PORT = 8001;
-const PUBLIC_IP = '46.105.122.140';
+const PUBLIC_IP = 'proxyserver.homelinux.net';
 const LOCAL_IP = Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
   .filter(z => z)[0].address;
@@ -120,17 +120,16 @@ passport.use(
       callbackURL: `http://${ PUBLIC_IP }:${ HTTP_PORT }/auth/google/callback`,
       passReqToCallback: true,
     },
-    (request, accessToken, refreshToken, profile, done) => {
-      process.nextTick(() => {
-        return done(null, profile);
-      });
+    function(request, accessToken, refreshToken, profile, done) {
+        console.log('Google callback profile id : %s', profile.id);
+        process.nextTick(function () {
+            return done(null, profile);
+        });
     }
   )
 );
 
 const app = express();
-app.set('views', `${ __dirname }/views`);
-app.set('view engine', 'ejs');
 app.use(express.static(`${ __dirname }/public`));
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -151,8 +150,8 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
     store: new mongoDBStore({
-      uri: '',
-      collection: '',
+        uri: 'mongodb://127.0.0.1:27017/Catcam',
+      collection: 'sessions',
     }),
   })
 );
@@ -168,17 +167,17 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get('/', (req, res) => {
-  console.log(`Stream Connected / : ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
+  console.log(`/ : ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
 });
 
 app.get('/account', ensureAuthenticated, (req, res) => {
-  console.log(`Stream Connected /account: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
+  console.log(`/account: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
 });
 
 app.get('/login', (req, res) => {
-  console.log(`Stream Connected /login: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
+  console.log(`/login: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   res
     .status(200)
     .json(
@@ -187,13 +186,13 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-  console.log(`Stream Connected /logout: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
+  console.log(`/logout: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   req.logout();
   res.redirect('/');
 });
 
 app.get('/stream', (req, res) => {
-  console.log(`Stream Connected /stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
+  console.log(`/stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
 
   res.connection.setTimeout(0);
   req.on('data', data => {
@@ -208,7 +207,7 @@ app.get('/stream', (req, res) => {
 app.get(
   '/auth/google',
   passport.authenticate('google', {
-    scope: ['https://www.googleapis.com/auth/plus.login'],
+      scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'],
   })
 );
 
@@ -220,7 +219,10 @@ app.get(
   })
 );
 
-http.createServer(app).listen(HTTP_PORT);
+const cert = fs.readFileSync('./certs/cert.pem');
+const key = fs.readFileSync('./certs/key.pem');
 
-console.log('Listening for incomming MPEG-TS Stream on http://%s:%d', LOCAL_IP, HTTP_PORT);
-console.log('Awaiting WebSocket connections on ws://%s:%d/', LOCAL_IP, WEBSOCKET_PORT);
+https.createServer({ cert, key }, app).listen(HTTP_PORT);
+
+console.log('REST API on https://%s:%d', PUBLIC_IP, HTTP_PORT);
+console.log('Awaiting WebSocket connections on ws://%s:%d/', PUBLIC_IP, WEBSOCKET_PORT);
