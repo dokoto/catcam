@@ -1,30 +1,112 @@
-export const LOGIN_REQUEST = 'LOGIN_REQUEST';
-export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
-export const LOGIN_FAILURE = 'LOGIN_FAILURE';
+import fetch from 'isomorphic-fetch';
 
-export function requestLogin(creds) {
+export const LOGIN_REQUEST = 'LOGIN_REQUEST';
+export const LOGOUT_REQUEST = 'LOGOUT_REQUEST';
+export const LOGIN_OAUTH2_REQUEST = 'LOGIN_OAUTH2_REQUEST';
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const PROCESS_FAILURE = 'PROCESS_FAILURE';
+
+export function requestLogin() {
   return {
     type: LOGIN_REQUEST,
-    isFetching: true,
-    isAuthenticated: false,
-    creds,
+  };
+}
+
+export function requestLogout() {
+  return {
+    type: LOGOUT_REQUEST,
+  };
+}
+
+export function requestOauth2() {
+  return {
+    type: LOGIN_OAUTH2_REQUEST,
   };
 }
 
 export function receiveLogin(user) {
   return {
     type: LOGIN_SUCCESS,
-    isFetching: false,
-    isAuthenticated: true,
-    id_token: user.id_token,
+    user,
   };
 }
 
-export function loginError(message) {
+export function receiveLogout() {
   return {
-    type: LOGIN_FAILURE,
-    isFetching: false,
-    isAuthenticated: false,
+    type: LOGOUT_SUCCESS,
+  };
+}
+
+export function processError(message) {
+  return {
+    type: PROCESS_FAILURE,
     message,
+  };
+}
+
+export function doLogout() {
+  return dispatch => {
+    dispatch(requestLogout());
+    return fetch('https://proxyserver.homelinux.net:8001/logout')
+      .then(respStr => {
+        try {
+          const res = JSON.parse(respStr);
+          if (res.auth) {
+            dispatch(receiveLogout());
+          } else {
+            dispatch(processError('Logout error'));
+          }
+        } catch (err) {
+          dispatch(processError(err.message));
+        }
+      })
+      .catch(err => {
+        dispatch(processError(err.message));
+      });
+  };
+}
+
+export function doOauth(path) {
+  return dispatch => {
+    dispatch(requestOauth2());
+    return fetch(`https://proxyserver.homelinux.net:8001/${ path }`)
+      .then(respStr => {
+        try {
+          const res = JSON.parse(respStr);
+          if (!res.auth) {
+            dispatch(receiveLogout());
+          } else {
+            dispatch(processError('Login error'));
+          }
+        } catch (err) {
+          dispatch(processError(err.message));
+        }
+      })
+      .catch(err => {
+        dispatch(processError(err.message));
+      });
+  };
+}
+
+export function doLogin() {
+  return dispatch => {
+    dispatch(requestLogin());
+    return fetch('https://proxyserver.homelinux.net:8001/login')
+      .then(respStr => {
+        try {
+          const res = JSON.parse(respStr);
+          if (res.auth) {
+            dispatch(receiveLogin(res.user));
+          } else {
+            dispatch(doOauth(res.redirect));
+          }
+        } catch (err) {
+          dispatch(processError(err.message));
+        }
+      })
+      .catch(err => {
+        dispatch(processError(err.message));
+      });
   };
 }

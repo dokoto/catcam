@@ -171,11 +171,6 @@ app.get('/', (req, res) => {
   res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
 });
 
-app.get('/account', ensureAuthenticated, (req, res) => {
-  console.log(`/account: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
-  res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
-});
-
 app.get('/login', (req, res) => {
   console.log(`/login: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   res
@@ -191,7 +186,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-app.get('/stream', (req, res) => {
+app.get('/stream', ensureAuthenticated, (req, res) => {
   console.log(`/stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
 
   res.connection.setTimeout(0);
