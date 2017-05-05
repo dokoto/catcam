@@ -27,9 +27,9 @@ const ifs = require('os').networkInterfaces();
 
 const GOOGLE_CLIENT_ID = '702802836349-cmpihi89o5pp2mh85cl8t06g2k9jmjuu.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = '7v7XQ2fl-PfvMBSwGrfdMqDP';
-const WEBSOCKET_PORT = 8002;
-const HTTP_PORT = 8001;
-const PUBLIC_IP = 'proxyserver.homelinux.net';
+const WEBSOCKET_PORT = 4445;
+const HTTPS_PORT = 4443;
+const PUBLIC_IP = 'titan.homelinux.net';
 const LOCAL_IP = Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
   .filter(z => z)[0].address;
@@ -117,14 +117,14 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `https://${ PUBLIC_IP }:${ HTTP_PORT }/auth/google/callback`,
+      callbackURL: `https://${ PUBLIC_IP }:${ HTTPS_PORT }/auth/google/callback`,
       passReqToCallback: true,
     },
-    function(request, accessToken, refreshToken, profile, done) {
-        console.log('Google callback profile id : %s', profile.id);
-        process.nextTick(function () {
-            return done(null, profile);
-        });
+    (request, accessToken, refreshToken, profile, done) => {
+      console.log('Google callback profile id : %s', profile.id);
+      process.nextTick(() => {
+        return done(null, profile);
+      });
     }
   )
 );
@@ -150,7 +150,7 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
     store: new mongoDBStore({
-        uri: 'mongodb://127.0.0.1:27017/Catcam',
+      uri: 'mongodb://127.0.0.1:27017/Catcam',
       collection: 'sessions',
     }),
   })
@@ -202,7 +202,10 @@ app.get('/stream', ensureAuthenticated, (req, res) => {
 app.get(
   '/auth/google',
   passport.authenticate('google', {
-      scope: ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/plus.profile.emails.read'],
+    scope: [
+      'https://www.googleapis.com/auth/plus.login',
+      'https://www.googleapis.com/auth/plus.profile.emails.read',
+    ],
   })
 );
 
@@ -217,7 +220,7 @@ app.get(
 const cert = fs.readFileSync('./certs/cert.pem');
 const key = fs.readFileSync('./certs/key.pem');
 
-https.createServer({ cert, key }, app).listen(HTTP_PORT);
+https.createServer({ cert, key }, app).listen(HTTPS_PORT);
 
-console.log('REST API on https://%s:%d', PUBLIC_IP, HTTP_PORT);
-console.log('Awaiting WebSocket connections on ws://%s:%d/', PUBLIC_IP, WEBSOCKET_PORT);
+console.log('PUBLIC REST API on https://%s:%s/camcat/', PUBLIC_IP, HTTPS_PORT);
+console.log('PUBLIC WEBSOCKET ws://%s:%d/', PUBLIC_IP, WEBSOCKET_PORT);
