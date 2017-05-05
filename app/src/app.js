@@ -7,6 +7,8 @@ import reducers from './modules/root/root_reducers';
 import Router from './modules/root/root_router';
 import logger from './helpers/logger';
 
+
+console.log('ENVIRONMENT VARS %s %s %s', TARGET, PLATFORM, VERSION);
 const store = createStore(reducers, applyMiddleware(thunk, logger));
 
 ReactDOM.render(

@@ -20,6 +20,11 @@ env:
   browser: true
   node: true
 
+globals:
+  TARGET: true
+  PLATFORM: true
+  VERSION: true
+
 rules:
   arrow-body-style: 0
   arrow-parens: 0

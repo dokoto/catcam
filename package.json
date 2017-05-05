@@ -5,9 +5,9 @@
   "main": "catcamd.js",
   "scripts": {
     "debug": "node --inspect-brk catcamd.js",
-    "test-nodash": "set NODE_ENV=\"development\" && node node_modules/webpack/bin/webpack.js --config scripts/webpack.dev.config.js",
-    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.dev.config.js --colors --no-info",
-    "build-web": "set NODE_ENV=\"production\" && node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.prod.config.js --progress --profile --colors",
+    "test-nodash": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.dev.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1'",
+    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.dev.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1'",
+    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.prod.config.js --progress --profile --colors",
     "parse": "eslint ."
   },
   "keywords": [
