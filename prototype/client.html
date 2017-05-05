@@ -1,142 +1,150 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta charset="utf-8" />
-    </head>
+  <head>
+    <meta charset="utf-8" />
+  </head>
 
-    <body>
-        <video id="camera" width="100%" autoplay></video>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
-        <script>
-            /*
-             * Chrome: MIME_CODEC tiene que ser muy exacto sino chrome da un error
-             */
-            const MIME_CODEC_WEBM = 'video/webm; codecs="vp8"';
-            const MIME_CODEC_MP4= 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
-            const MIME_CODEC = MIME_CODEC_WEBM;
-            const WS_HOST = 'ws://10.80.80.28:8002';
+  <body>
+    <video id="camera" width="100%" autoplay></video>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script>
+      /*
+       * Chrome: MIME_CODEC tiene que ser muy exacto sino chrome da un error
+       */
+      const MIME_CODEC_WEBM = 'video/webm; codecs="vp8"';
+      const MIME_CODEC_MP4 = 'video/mp4; codecs="avc1.42C028, avc1.42E01E, avc1.42c00d, mp4a.40.2"';
+      const MIME_CODEC = MIME_CODEC_WEBM;
+      const WS_HOST = 'ws://titan.homelinux.net:4445';
 
-            let mediaSource, video, queue = [];
-            if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
-                try {
-                    console.log('>>>>>>>>>>>> MEDIASOURCE DETECTED');
-                    mediaSource = new MediaSource();
-                    video = document.getElementById('camera');
-                    video.src = window.URL.createObjectURL(mediaSource);
+      let mediaSource, video, queue = [];
+      if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
+        try {
+          console.log('>>>>>>>>>>>> MEDIASOURCE DETECTED');
+          mediaSource = new MediaSource();
+          video = document.getElementById('camera');
+          video.src = window.URL.createObjectURL(mediaSource);
 
-                    mediaSource.addEventListener('sourceopen', sourceOpenOnLive, false);
-                    //mediaSource.addEventListener('sourceopen', sourceOpenAjaxChrome, false);
-                    //mediaSource.addEventListener('sourceopen', sourceOpenAjaxFirefox, false);
+          mediaSource.addEventListener('sourceopen', sourceOpenOnLive, false);
+          //mediaSource.addEventListener('sourceopen', sourceOpenAjaxChrome, false);
+          //mediaSource.addEventListener('sourceopen', sourceOpenAjaxFirefox, false);
 
-                    mediaSource.addEventListener('sourceend', sourceEnd, false);
-                    mediaSource.addEventListener('sourceclose', sourceClose, false);
-                } catch (err) {
-                    console.error(err);
-                }
-            } else {
-                console.error('Unsupported MIME type or codec: ', mimeCodec);
-            }
+          mediaSource.addEventListener('sourceend', sourceEnd, false);
+          mediaSource.addEventListener('sourceclose', sourceClose, false);
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        console.error('Unsupported MIME type or codec: ', mimeCodec);
+      }
 
-            function sourceEnd() {
-                console.log('>>>>>>>>>>>> SOURCE END');
-            }
+      function sourceEnd() {
+        console.log('>>>>>>>>>>>> SOURCE END');
+      }
 
-            function sourceClose() {
-                console.log('>>>>>>>>>>>> SOURCE CLOSE');
-            }
+      function sourceClose() {
+        console.log('>>>>>>>>>>>> SOURCE CLOSE');
+      }
 
-            function sourceOpenOnLive() {
-                console.log('>>>>>>>>>>>> SOURCE OPEN OnLIVE');
-                const srcBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
-                srcBuffer.mode = 'sequence';
+      function sourceOpenOnLive() {
+        console.log('>>>>>>>>>>>> SOURCE OPEN OnLIVE');
+        const srcBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+        srcBuffer.mode = 'sequence';
 
-                srcBuffer.addEventListener('update', function() {
-                    if (queue.length > 0 && !srcBuffer.updating) {
-                        srcBuffer.appendBuffer(queue.shift());
-                    }
-                });
+        srcBuffer.addEventListener('update', function() {
+          if (queue.length > 0 && !srcBuffer.updating) {
+            srcBuffer.appendBuffer(queue.shift());
+          }
+        });
 
-                srcBuffer.addEventListener('updateend', function() {
-                    if (queue.length > 0 && !srcBuffer.updating) {
-                        srcBuffer.appendBuffer(queue.shift());
-                    }
-                });
+        srcBuffer.addEventListener('updateend', function() {
+          if (queue.length > 0 && !srcBuffer.updating) {
+            srcBuffer.appendBuffer(queue.shift());
+          }
+        });
 
-                srcBuffer.addEventListener('error', function(e) {
-                    ws.close();
-                    console.error(e);
-                });
+        srcBuffer.addEventListener('error', function(e) {
+          ws.close();
+          console.error(e);
+        });
 
-                const ws = io.connect(WS_HOST);
-                ws.on('onChunk', function(buffer) {
-                    if (srcBuffer.updating || queue.length > 0) {
-                        queue.push(new Uint8Array(buffer));
-                    } else {
-                        srcBuffer.appendBuffer(new Uint8Array(buffer));
-                        video.play();
-                    }
-                });
-            }
+        const ws = io.connect(WS_HOST);
+        ws.on('connect', () => {
+          $.get('https://titan.homelinux.net:4443/stream', res => {
+            ws.emit('join', res.channel);
+            ws.on('onChunk', function(buffer) {
+              if (srcBuffer.updating || queue.length > 0) {
+                queue.push(new Uint8Array(buffer));
+              } else {
+                srcBuffer.appendBuffer(new Uint8Array(buffer));
+                video.play();
+              }
+            });
+            ws.emit('start', res.channel);
+          });
+        });
 
-            const VIDEO_TEST1 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';
-            const VIDEO_TEST2 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.mp4';
-            const VIDEO_TEST3 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.webm';
-            const VIDEO_TEST4 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.webm';
+      }
 
-            function sourceOpenAjaxFirefox() {
-                console.log('>>>>>>>>>>>> SOURCE OPEN AJAX FIREFOX');
-                let mediaSource = this;
-                console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                try {
-                    let sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
-                    fetchAB(VIDEO_TEST4, function(buf) {
-                        sourceBuffer.addEventListener('updateend', function(_) {
-                            console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                            if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
-                                mediaSource.endOfStream();
-                            }
-                            video.play();
-                        });
-                        sourceBuffer.appendBuffer(buf);
-                    });
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+      const VIDEO_TEST1 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';
+      const VIDEO_TEST2 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.mp4';
+      const VIDEO_TEST3 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.webm';
+      const VIDEO_TEST4 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/test.webm';
 
-            function sourceOpenAjaxChrome() {
-                console.log('>>>>>>>>>>>> SOURCE OPEN AJAX CHROME');
-                let mediaSource = this;
-                console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                try {
-                    let sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
-                    fetchAB(VIDEO_TEST3, function(buf) {
-                        sourceBuffer.addEventListener('updateend', function(_) {
-                            console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
-                            if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
-                                mediaSource.endOfStream();
-                            }
-                            video.play();
-                        });
-                        sourceBuffer.appendBuffer(buf);
-                    });
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+      function sourceOpenAjaxFirefox() {
+        console.log('>>>>>>>>>>>> SOURCE OPEN AJAX FIREFOX');
+        let mediaSource = this;
+        console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+        try {
+          let sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+          fetchAB(VIDEO_TEST4, function(buf) {
+            sourceBuffer.addEventListener('updateend', function(_) {
+              console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+              if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
+                mediaSource.endOfStream();
+              }
+              video.play();
+            });
+            sourceBuffer.appendBuffer(buf);
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
 
-            function fetchAB(url, cb) {
-                console.log(url);
-                let xhr = new XMLHttpRequest;
-                xhr.open('get', url);
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function() {
-                    cb(new Uint8Array(xhr.response));
-                };
-                xhr.send();
-            };
-        </script>
-    </body>
+      function sourceOpenAjaxChrome() {
+        console.log('>>>>>>>>>>>> SOURCE OPEN AJAX CHROME');
+        let mediaSource = this;
+        console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+        try {
+          let sourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
+          fetchAB(VIDEO_TEST3, function(buf) {
+            sourceBuffer.addEventListener('updateend', function(_) {
+              console.log('>>>>>>> MEDIASOURCE READYSTATE: ' + mediaSource.readyState);
+              if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
+                mediaSource.endOfStream();
+              }
+              video.play();
+            });
+            sourceBuffer.appendBuffer(buf);
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      function fetchAB(url, cb) {
+        console.log(url);
+        let xhr = new XMLHttpRequest;
+        xhr.open('get', url);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function() {
+          cb(new Uint8Array(xhr.response));
+        };
+        xhr.send();
+      };
+    </script>
+  </body>
 
 </html>
