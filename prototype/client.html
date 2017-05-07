@@ -8,7 +8,7 @@
   <body>
     <video id="camera" width="100%" autoplay></video>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script>
       /*
        * Chrome: MIME_CODEC tiene que ser muy exacto sino chrome da un error
@@ -71,20 +71,53 @@
 
         const ws = io.connect(WS_HOST);
         ws.on('connect', () => {
-          $.get('https://titan.homelinux.net:4443/stream', res => {
-            ws.emit('join', res.channel);
-            ws.on('onChunk', function(buffer) {
-              if (srcBuffer.updating || queue.length > 0) {
-                queue.push(new Uint8Array(buffer));
+          console.log('Requesting stream rom id from server');
+          $.get('https://titan.homelinux.net:4443/login').then(res => {
+              if (typeof res === 'string') res = JSON.parse(res);
+              console.log('Response: %o', res);
+              if (!res.auth) {
+                throw {
+                  name: 'redirect',
+                  url: `https://titan.homelinux.net:4443${ res.redirect }`
+                };
               } else {
-                srcBuffer.appendBuffer(new Uint8Array(buffer));
-                video.play();
+                return res;
+              }
+            }).then(res => {
+              if (typeof res === 'string') res = JSON.parse(res);
+              console.log('Response: %o', res);
+              if (!res.auth) {
+                throw new Error('No auth');
+              } else {
+                return $.get('https://titan.homelinux.net:4443/stream');
+              }
+            }).then(res => {
+              if (typeof res === 'string') res = JSON.parse(res);
+              if (res.auth) {
+                ws.emit('join', res.channel);
+                ws.on('onChunk', function(buffer) {
+                  if (srcBuffer.updating || queue.length > 0) {
+                    queue.push(new Uint8Array(buffer));
+                  } else {
+                    srcBuffer.appendBuffer(new Uint8Array(buffer));
+                    video.play();
+                  }
+                });
+                ws.emit('start', res.channel);
+              } else {
+                throw new Error('No auth');
+              }
+            })
+            .catch(err => {
+              ws.close();
+              if (err instanceof Error) {
+                console.error(`Error: ${ err }`);
+              } else if (err.name === 'redirect') {
+                window.location.href = err.url;
               }
             });
-            ws.emit('start', res.channel);
-          });
-        });
 
+        });
       }
 
       const VIDEO_TEST1 = 'http://127.0.0.1/Users/malfaros/DEV/JAVASCRIPT/PROTOTYPES/CATCAM/frag_bunny.mp4';

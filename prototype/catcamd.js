@@ -198,6 +198,12 @@ app.use(
     extended: true,
   })
 );
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 app.use(
   session({
     secret: 'camcat',
@@ -219,9 +225,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 function ensureAuthenticated(req, res, next) {
+  console.log('Requesting authentication...');
   if (req.isAuthenticated()) {
+    console.log('Yeah is authenticated');
     return next();
   }
+  console.log('Oooooh, you are not authenticado');
   res.redirect('/login');
   return null;
 }
@@ -249,7 +258,9 @@ app.get('/logout', (req, res) => {
 app.get('/stream', ensureAuthenticated, (req, res) => {
   console.log(`/stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
   WS_CHANNEL = generateRandHash();
-  res.status(200).json(JSON.stringify({ channel: WS_CHANNEL }));
+  res
+    .status(200)
+    .json(JSON.stringify({ user: req.user, auth: req.isAuthenticated(), channel: WS_CHANNEL }));
 });
 
 app.get(
