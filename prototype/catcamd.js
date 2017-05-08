@@ -12,7 +12,7 @@
  ** http://html5-demos.appspot.com/static/media-source.html
  */
 
-const https = require('https');
+//const https = require('https');
 const http = require('http');
 const express = require('express');
 const passport = require('passport');
@@ -31,7 +31,7 @@ const ifs = require('os').networkInterfaces();
 const GOOGLE_CLIENT_ID = '702802836349-cmpihi89o5pp2mh85cl8t06g2k9jmjuu.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = '7v7XQ2fl-PfvMBSwGrfdMqDP';
 const WEBSOCKET_PORT = 4445;
-const HTTPS_PORT = 4443;
+const HTTP_PORT = 8002;
 const STREAM_PORT = 8001;
 const PUBLIC_IP = 'titan.homelinux.net';
 const LOCAL_IP = Object.keys(ifs)
@@ -177,7 +177,7 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `https://${ PUBLIC_IP }:${ HTTPS_PORT }/auth/google/callback`,
+      callbackURL: 'http://proxyserver.homelinux.net/catcam/auth/google/callback', // `http://${ PUBLIC_IP }:${ HTTP_PORT }/auth/google/callback`,
       passReqToCallback: true,
     },
     (request, accessToken, refreshToken, profile, done) => {
@@ -287,10 +287,11 @@ app.get(
   })
 );
 
-const cert = fs.readFileSync('./certs/cert.pem');
-const key = fs.readFileSync('./certs/key.pem');
+//const cert = fs.readFileSync('./certs/cert.pem');
+//const key = fs.readFileSync('./certs/key.pem');
 
-https.createServer({ cert, key }, app).listen(HTTPS_PORT);
+//https.createServer({ cert, key }, app).listen(HTTPS_PORT);
+http.createServer(app).listen(HTTP_PORT);
 
 // ********************************************************
 // STREAM HTTP SERVER
@@ -311,5 +312,6 @@ http
   .listen(STREAM_PORT, LOCAL_IP);
 
 console.log('LOCAL HTTP BROADCAST-VIDEO on http://%s:%s', LOCAL_IP, STREAM_PORT);
-console.log('PUBLIC REST API on https://%s:%s', PUBLIC_IP, HTTPS_PORT);
+// console.log('PUBLIC REST API on https://%s:%s', PUBLIC_IP, HTTPS_PORT);
+console.log('PUBLIC REST API on http://%s:%s', PUBLIC_IP, HTTP_PORT);
 console.log('PUBLIC WEBSOCKET ws://%s:%d/', PUBLIC_IP, WEBSOCKET_PORT);
