@@ -1,0 +1,17 @@
+{
+  "name": "catcam",
+  "version": "0.0.1",
+  "description": "Broadcast cat video/audio on live",
+  "main": "catcamd.js",
+  "scripts": {
+    "test": "node --inspect-brk catcamd.js"
+  },
+  "keywords": [
+    "webcam"
+  ],
+  "author": "dokoto.moloko@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^1.7.3"
+  }
+}
