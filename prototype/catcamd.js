@@ -190,6 +190,8 @@ passport.use(
 );
 
 const app = express();
+app.set('views', `${ __dirname }/views`);
+app.set('view engine', 'ejs');
 app.use(express.static(`${ __dirname }/public`));
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -237,7 +239,11 @@ function ensureAuthenticated(req, res, next) {
 
 app.get('/', (req, res) => {
   console.log(`/ : ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
-  res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
+  if (req.isAuthenticated()) {
+    res.render('/loginSuccess', { user: req.user });
+  } else {
+    res.status(200).json(JSON.stringify({ user: req.user, auth: req.isAuthenticated() }));
+  }
 });
 
 app.get('/login', (req, res) => {

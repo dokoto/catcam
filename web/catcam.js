@@ -1,11 +1,10 @@
-'use strict';
+
 
 const MIME_CODEC_CHROME_ALIVE = 'video/webm; codecs="vp8"';
 const WS_HOST = 'ws://titan.homelinux.net:4445';
 let mediaSource,
   video,
   queue = [];
-
 
 function sourceEnd() {
   console.log('>>>>>>>>>>>> SOURCE END');
@@ -31,12 +30,12 @@ function sourceOpenOnLive() {
       srcBuffer.appendBuffer(queue.shift());
     }
   });
-  srcBuffer.addEventListener('error', (e) => {
+  srcBuffer.addEventListener('error', e => {
     ws.close();
     console.error(e);
   });
 
-  ws.on('onChunk', (buffer) => {
+  ws.on('onChunk', buffer => {
     if (srcBuffer.updating || queue.length > 0) {
       queue.push(new Uint8Array(buffer));
     } else {

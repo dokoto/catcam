@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-'use strict';
-
 const http = require('http');
 const ws = require('socket.io')();
 const exec = require('child_process').exec;
@@ -12,8 +10,8 @@ const WEBSOCKET_PORT = 4445;
 const STREAM_PORT = 8001;
 const PUBLIC_IP = 'titan.homelinux.net';
 const LOCAL_IP = Object.keys(ifs)
-      .map(x => ifs[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
-        .filter(x => x)[0].address;
+  .map(x => ifs[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
+  .filter(x => x)[0].address;
 
 const FFMPEG_CMD = [
   '-f',
@@ -48,46 +46,49 @@ const FFMPEG_CMD = [
 
 let childProcess;
 ws.on('connection', sockConn => {
-    console.log('New WebSocket Connection: ', sockConn.conn.remoteAddress, sockConn.client.request.headers['user-agent']);
+  console.log(
+    'New WebSocket Connection: ',
+    sockConn.conn.remoteAddress,
+    sockConn.client.request.headers['user-agent']
+  );
 
-    if (childProcess) {
-        childProcess.kill('SIGKILL');
-        setTimeout(function() {
-            console.log('Process endded, new process..');
-            childProcess = spawn('ffmpeg', FFMPEG_CMD);
-        }, 1000);
-    } else {
-        console.log(`ffmpeg ${ FFMPEG_CMD.join(' ') }`);
-        childProcess = spawn('ffmpeg', FFMPEG_CMD);
-    }
+  if (childProcess) {
+    childProcess.kill('SIGKILL');
+    setTimeout(() => {
+      console.log('Process endded, new process..');
+      childProcess = spawn('ffmpeg', FFMPEG_CMD);
+    }, 1000);
+  } else {
+    console.log(`ffmpeg ${ FFMPEG_CMD.join(' ') }`);
+    childProcess = spawn('ffmpeg', FFMPEG_CMD);
+  }
 
-    sockConn.on('close', function(code, message) {
-        console.log('Disconnected WebSocket');
-    });
+  sockConn.on('close', (code, message) => {
+    console.log('Disconnected WebSocket');
+  });
 
-    sockConn.on('disconnect', function() {
-        console.log('Client disconected');
-        ws.emit('user disconnected');
-    });
-
+  sockConn.on('disconnect', () => {
+    console.log('Client disconected');
+    ws.emit('user disconnected');
+  });
 });
 
 ws.listen(WEBSOCKET_PORT);
 
-const httpServer = http.createServer((req, res) => {
-    console.log('Stream Connected: ' + req.socket.remoteAddress + ':' + req.socket.remotePort);
+const httpServer = http
+  .createServer((req, res) => {
+    console.log(`Stream Connected: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
 
     res.connection.setTimeout(0);
-    req.on('data', function(data) {
-        ws.emit('onChunk', data);
+    req.on('data', (data) => {
+      ws.emit('onChunk', data);
     });
 
-    req.on('end', function() {
-        console.log('close');
+    req.on('end', () => {
+      console.log('close');
     });
-
-}).listen(STREAM_PORT);
-
+  })
+  .listen(STREAM_PORT);
 
 console.log('LOCAL HTTP BROADCAST-VIDEO on http://%s:%s', LOCAL_IP, STREAM_PORT);
 console.log('PUBLIC WEBSOCKET ws://%s:%d/', PUBLIC_IP, WEBSOCKET_PORT);
