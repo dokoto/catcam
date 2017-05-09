@@ -13,3 +13,7 @@ body, input, textarea {
 .border-box, article, div, span, img, p, a, header, footer, ul, li, h1, h2, h3, h4, h5, h6 {
     box-sizing: border-box;
 }
+
+.container {
+  background-image: url('../../../assets/img/login_bg.jpg');
+}

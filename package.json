@@ -24,6 +24,7 @@
     "file-loader": "^0.11.1",
     "immutable": "^3.8.1",
     "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.4",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
@@ -36,6 +37,7 @@
     "redux-devtools-dock-monitor": "^1.1.1",
     "redux-devtools-log-monitor": "^1.2.0",
     "redux-thunk": "^2.2.0",
+    "sinon": "^2.2.0",
     "socket.io": "^1.7.3"
   },
   "devDependencies": {

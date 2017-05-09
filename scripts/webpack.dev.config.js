@@ -1,5 +1,3 @@
-
-
 const webpack = require('webpack');
 const path = require('path');
 
@@ -7,11 +5,17 @@ const DashboardPlugin = require('webpack-dashboard/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const ifs = require('os').networkInterfaces();
 
 const jsSourcePath = path.join(__dirname, '../app/src');
 const buildPath = path.join(__dirname, '../build');
 const imgPath = path.join(__dirname, '../app/assets/img');
 const sourcePath = path.join(__dirname, '../app');
+const HTTP_PORT = 8002;
+const LOCAL_IP = Object.keys(ifs)
+  .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
+  .filter(z => z)[0].address;
+const TEST_REST_API = `'http://${ LOCAL_IP }:${ HTTP_PORT }'`;
 
 module.exports = env => {
   console.log('ENVIRONMENT VARS %s', JSON.stringify(env));
@@ -44,9 +48,10 @@ module.exports = env => {
       },
     }),
     new webpack.DefinePlugin({
-      TARGET: JSON.stringify(env.target),
-      PLATFORM: JSON.stringify(env.platform),
-      VERSION: JSON.stringify(env.version),
+      TARGET: env.target,
+      PLATFORM: env.platform,
+      VERSION: env.version,
+      REST_API: env.target === "'dev'" ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
     }),
   ];
 
@@ -101,23 +106,20 @@ module.exports = env => {
     });
   } else {
     // Development plugins
-    plugins.push(new webpack.HotModuleReplacementPlugin(), new DashboardPlugin());
+    plugins.push(
+      new webpack.HotModuleReplacementPlugin(),
+      new DashboardPlugin(),
+      new ExtractTextPlugin('style-[hash].css')
+    );
 
     // Development rules
     rules.push({
       test: /\.scss$/,
       exclude: /node_modules/,
-      use: [
-        'style-loader',
-        // Using source maps breaks urls in the CSS loader
-        // https://github.com/webpack/css-loader/issues/232
-        // This comment solves it, but breaks testing from a local network
-        // https://github.com/webpack/css-loader/issues/232#issuecomment-240449998
-        // 'css-loader?sourceMap',
-        'css-loader',
-        'postcss-loader',
-        'sass-loader?sourceMap',
-      ],
+      use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: ['css-loader', 'sass-loader']
+        }),
     });
   }
 

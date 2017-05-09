@@ -1,0 +1,27 @@
+html, body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+body, input, textarea {
+  font-family: Arial, Tahoma;
+}
+
+.block {
+  display: block;
+}
+
+.aligned {
+  margin: 0px auto!important;
+}
+
+.border-box, article, div, span, img, p, a, header, footer, ul, li, h1, h2, h3, h4, h5, h6 {
+    box-sizing: border-box;
+}
+
+.container {
+  background-color: blue;
+}

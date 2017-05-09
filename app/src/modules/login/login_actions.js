@@ -46,18 +46,19 @@ export function processError(message) {
 export function doLogout() {
   return dispatch => {
     dispatch(requestLogout());
-    return fetch('https://proxyserver.homelinux.net:8001/logout')
-      .then(respStr => {
-        try {
-          const res = JSON.parse(respStr);
-          if (res.auth) {
-            dispatch(receiveLogout());
-          } else {
-            dispatch(processError('Logout error'));
+    return fetch(`${ REST_API }/logout`)
+      .then(response => {
+        response.json().then(json => {
+          try {
+            if (!json.auth) {
+              dispatch(receiveLogout());
+            } else {
+              dispatch(processError('Logout error'));
+            }
+          } catch (err) {
+            dispatch(processError(err.message));
           }
-        } catch (err) {
-          dispatch(processError(err.message));
-        }
+        });
       })
       .catch(err => {
         dispatch(processError(err.message));
@@ -68,18 +69,19 @@ export function doLogout() {
 export function doOauth(path) {
   return dispatch => {
     dispatch(requestOauth2());
-    return fetch(`https://proxyserver.homelinux.net:8001/${ path }`)
-      .then(respStr => {
-        try {
-          const res = JSON.parse(respStr);
-          if (!res.auth) {
-            dispatch(receiveLogout());
-          } else {
-            dispatch(processError('Login error'));
+    return fetch(`${ REST_API }${ path }`)
+      .then(response => {
+        response.json().then(json => {
+          try {
+            if (json.auth) {
+              dispatch(receiveLogin());
+            } else {
+              dispatch(processError('Login error'));
+            }
+          } catch (err) {
+            dispatch(processError(err.message));
           }
-        } catch (err) {
-          dispatch(processError(err.message));
-        }
+        });
       })
       .catch(err => {
         dispatch(processError(err.message));
@@ -90,18 +92,19 @@ export function doOauth(path) {
 export function doLogin() {
   return dispatch => {
     dispatch(requestLogin());
-    return fetch('https://proxyserver.homelinux.net:8001/login')
-      .then(respStr => {
-        try {
-          const res = JSON.parse(respStr);
-          if (res.auth) {
-            dispatch(receiveLogin(res.user));
-          } else {
-            dispatch(doOauth(res.redirect));
+    return fetch(`${ REST_API }/login`)
+      .then(response => {
+        response.json().then(json => {
+          try {
+            if (json.auth) {
+              dispatch(receiveLogin(json.user));
+            } else {
+              dispatch(doOauth(json.redirect));
+            }
+          } catch (err) {
+            dispatch(processError(err.message));
           }
-        } catch (err) {
-          dispatch(processError(err.message));
-        }
+        });
       })
       .catch(err => {
         dispatch(processError(err.message));

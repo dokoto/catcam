@@ -24,6 +24,7 @@ globals:
   TARGET: true
   PLATFORM: true
   VERSION: true
+  REST_API: true
 
 rules:
   arrow-body-style: 0
