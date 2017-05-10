@@ -10,6 +10,7 @@ const ifs = require('os').networkInterfaces();
 const jsSourcePath = path.join(__dirname, '../app/src');
 const buildPath = path.join(__dirname, '../build');
 const imgPath = path.join(__dirname, '../app/assets/img');
+const fontsPath = path.join(__dirname, '../app/assets/fonts');
 const sourcePath = path.join(__dirname, '../app');
 const HTTP_PORT = 8002;
 const LOCAL_IP = Object.keys(ifs)
@@ -52,6 +53,7 @@ module.exports = env => {
       PLATFORM: env.platform,
       VERSION: env.version,
       REST_API: env.target === "'dev'" ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
+      LANGUAJE: env.languaje,
     }),
   ];
 
@@ -67,6 +69,11 @@ module.exports = env => {
       include: imgPath,
       use: 'url-loader?limit=20480&name=assets/[name]-[hash].[ext]',
     },
+    {
+      test: /.*\.(woff|woff2|eot|ttf)$/i,
+      include: fontsPath,
+      use: 'file-loader?hash=sha512&digest=hex&name=./assets/[hash].[ext]',
+    }
   ];
 
   if (isProduction) {
@@ -106,20 +113,13 @@ module.exports = env => {
     });
   } else {
     // Development plugins
-    plugins.push(
-      new webpack.HotModuleReplacementPlugin(),
-      new DashboardPlugin(),
-      new ExtractTextPlugin('style-[hash].css')
-    );
+    plugins.push(new webpack.HotModuleReplacementPlugin(), new DashboardPlugin());
 
     // Development rules
     rules.push({
       test: /\.scss$/,
       exclude: /node_modules/,
-      use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: ['css-loader', 'sass-loader']
-        }),
+      use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader?sourceMap'],
     });
   }
 

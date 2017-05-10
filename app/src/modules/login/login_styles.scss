@@ -1,27 +1,22 @@
-html, body {
-  position: relative;
-  width: 100%;
+@import '../../../assets/styles/shake';
+
+.container-login {
+  background-image: url('../../../assets/img/login_bg.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: grayscale(90%);
   height: 100%;
-  margin: 0px;
-  padding: 0px;
 }
 
-body, input, textarea {
-  font-family: Arial, Tahoma;
-}
-
-.block {
-  display: block;
-}
-
-.aligned {
-  margin: 0px auto!important;
-}
-
-.border-box, article, div, span, img, p, a, header, footer, ul, li, h1, h2, h3, h4, h5, h6 {
-    box-sizing: border-box;
-}
-
-.container {
-  background-color: blue;
+.login-link {
+  position: absolute;
+  bottom: 10%;
+  width: 100%;
+  padding: 7%;
+  text-align: center;
+  color: black;
+  font-size: x-large;
+  font-weight: bold;
+  text-decoration: none;
+  font-family: raleway;
 }

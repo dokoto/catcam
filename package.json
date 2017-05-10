@@ -5,9 +5,9 @@
   "main": "catcamd.js",
   "scripts": {
     "debug": "node --inspect-brk catcamd.js",
-    "test-nodash": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.dev.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1'",
-    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.dev.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1'",
-    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.prod.config.js --progress --profile --colors",
+    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.dev.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.dev.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.prod.config.js --progress --profile --colors --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "parse": "eslint ."
   },
   "keywords": [
@@ -28,6 +28,7 @@
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "react-intl": "^2.3.0",
     "react-redux": "^5.0.4",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",

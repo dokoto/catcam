@@ -8,6 +8,11 @@ export default (
   action
 ) => {
   switch (action.type) {
+    case actions.INIT_LOGIN:
+      return {
+        isFetching: false,
+        isAuthenticated: false,
+      };
     case actions.LOGIN_REQUEST:
       return {
         ...state,
@@ -44,7 +49,7 @@ export default (
         ...state,
         isFetching: false,
         isAuthenticated: false,
-        message: action.message,
+        error: action.message,
       };
     default:
       return state;

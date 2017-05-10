@@ -1,9 +1,16 @@
+export const INIT_LOGIN = 'INIT_LOGIN';
 export const LOGIN_REQUEST = 'LOGIN_REQUEST';
 export const LOGOUT_REQUEST = 'LOGOUT_REQUEST';
 export const LOGIN_OAUTH2_REQUEST = 'LOGIN_OAUTH2_REQUEST';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 export const PROCESS_FAILURE = 'PROCESS_FAILURE';
+
+export function initLogin() {
+  return {
+    type: INIT_LOGIN,
+  };
+}
 
 export function requestLogin() {
   return {

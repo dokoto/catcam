@@ -1,8 +1,8 @@
 import React from 'react';
-import * as style from './root_styles.scss';
+import './root_styles.scss';
 import Login from '../login/login_container';
 
-const App = () => <div id='app' className={ style.container } >
+const App = () => <div id='root' className='root-container' >
   <Login />
 </div>;
 
