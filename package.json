@@ -5,8 +5,8 @@
   "main": "catcamd.js",
   "scripts": {
     "debug": "node --inspect-brk catcamd.js",
-    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.dev.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.dev.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.prod.config.js --progress --profile --colors --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "parse": "eslint ."
   },

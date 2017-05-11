@@ -8,11 +8,11 @@ export default class Login extends Component {
     rute: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
     isFetching: PropTypes.bool.isRequired,
-    error: PropTypes.string,
+    error: PropTypes.object,
   };
 
   static defaultProps = {
-    error: '',
+    error: null,
   };
 
   render() {
@@ -26,7 +26,7 @@ export default class Login extends Component {
           onClick={ e => onClick(e) }
           className={ !isFetching && !error ? 'login-link' : 'login-link shake' }
         >
-          {!isFetching && !error ? <FormattedMessage id='login.auth.message' /> : error}
+          {!isFetching && !error ? <FormattedMessage id='login.auth.message' /> : <FormattedMessage id='login.auth.error' />}
         </a>
       );
     }

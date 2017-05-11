@@ -1,9 +1,9 @@
 export const INIT_LOGIN = 'INIT_LOGIN';
 export const LOGIN_REQUEST = 'LOGIN_REQUEST';
 export const LOGOUT_REQUEST = 'LOGOUT_REQUEST';
-export const LOGIN_OAUTH2_REQUEST = 'LOGIN_OAUTH2_REQUEST';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const LOGIN_OATUH = 'LOGIN_OATUH';
 export const PROCESS_FAILURE = 'PROCESS_FAILURE';
 
 export function initLogin() {
@@ -24,11 +24,6 @@ export function requestLogout() {
   };
 }
 
-export function requestOauth2() {
-  return {
-    type: LOGIN_OAUTH2_REQUEST,
-  };
-}
 
 export function receiveLogin(user) {
   return {
@@ -43,10 +38,17 @@ export function receiveLogout() {
   };
 }
 
-export function processError(message) {
+export function loginOAuth(redirectPath) {
+  return {
+    type: LOGIN_OATUH,
+    redirectPath,
+  };
+}
+
+export function processError(error) {
   return {
     type: PROCESS_FAILURE,
-    message,
+    error,
   };
 }
 
@@ -63,35 +65,12 @@ export function doLogout() {
               dispatch(processError('Logout error'));
             }
           } catch (err) {
-            dispatch(processError(err.message));
+            dispatch(processError(err));
           }
         });
       })
       .catch(err => {
-        dispatch(processError(err.message));
-      });
-  };
-}
-
-export function doOauth(path) {
-  return dispatch => {
-    dispatch(requestOauth2());
-    return fetch(`${ REST_API }${ path }`)
-      .then(response => {
-        response.json().then(json => {
-          try {
-            if (json.auth) {
-              dispatch(receiveLogin());
-            } else {
-              dispatch(processError('Login error'));
-            }
-          } catch (err) {
-            dispatch(processError(err.message));
-          }
-        });
-      })
-      .catch(err => {
-        dispatch(processError(err.message));
+        dispatch(processError(err));
       });
   };
 }
@@ -106,15 +85,15 @@ export function doLogin() {
             if (json.auth) {
               dispatch(receiveLogin(json.user));
             } else {
-              dispatch(doOauth(json.redirect));
+              dispatch(loginOAuth(json.redirect));
             }
           } catch (err) {
-            dispatch(processError(err.message));
+            dispatch(processError(err));
           }
         });
       })
       .catch(err => {
-        dispatch(processError(err.message));
+        dispatch(processError(err));
       });
   };
 }

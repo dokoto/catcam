@@ -25,11 +25,12 @@ export default (
         isFetching: true,
         isAuthenticated: true,
       };
-    case actions.LOGIN_OAUTH2_REQUEST:
+    case actions.LOGIN_OATUH:
       return {
         ...state,
-        isFetching: true,
+        isFetching: false,
         isAuthenticated: false,
+        redirectPath: action.redirectPath,
       };
     case actions.LOGIN_SUCCESS:
       return {
@@ -49,7 +50,7 @@ export default (
         ...state,
         isFetching: false,
         isAuthenticated: false,
-        error: action.message,
+        error: action.error,
       };
     default:
       return state;

@@ -1,4 +1,6 @@
 {
   "login.auth.message": "Login with Google account",
-  "login.auth.fetching": "Authenticating..."
+  "login.auth.fetching": "Authenticating...",
+  "login.auth.error": "Something went wrong, click to continue",
+  "sandbox.iframe.nosupported": "Your browser does not support iframes."
 }

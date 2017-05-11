@@ -42,7 +42,8 @@ app.get('/logout', (req, res) => {
 
 app.get('/auth/google', (req, res) => {
   console.log(`[MOCKER] /auth/google: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
-  res.status(200).json(RESP_USER_AUTH_SUCCESS);
+  res.render('loginSuccess', {response: RESP_USER_AUTH_SUCCESS});
+  //res.status(200).json(RESP_USER_AUTH_SUCCESS);
 });
 
 http.createServer(app).listen(HTTP_PORT);
