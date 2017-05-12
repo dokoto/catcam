@@ -34,7 +34,6 @@ export default (
       };
     case actions.LOGIN_SUCCESS:
       return {
-        ...state,
         isFetching: false,
         isAuthenticated: true,
         user: action.user,

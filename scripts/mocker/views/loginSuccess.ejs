@@ -9,8 +9,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="user" content="<%=response.user.displayName%>">
-    <meta name="isauth" content="<%=response.auth%>">
     <style>
       body,
       html {
@@ -70,15 +68,20 @@
     </style>
     <script>
       function closeWin() {
-        console.log('Unloading...');
-        const iframe = parent.document.getElementsByClassName('sandbox-container')[0];
+        const message = {
+          user: '<%= response.user.email %>',
+          auth: '<%= response.auth %>',
+          type: 'CATCAM_AUTH'
+        };
+        console.log('Sending closing message %o', message);
+        parent.postMessage(message, '*');
       }
     </script>
   </head>
 
   <body>
     <div class="container">
-      <span class="message"><%= response.user.displayName %> singing success
+      <span class="message"><%= response.user.email %> singing success
         <a href="#" onclick="closeWin()">Close</a>
       </span>
     </div>

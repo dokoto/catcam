@@ -1,11 +1,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import './login_styles.scss';
 
-import { doLogin, initLogin } from './login_actions';
+import { doLogin, initLogin, processError, receiveLogin } from './login_actions';
 import Login from './login_component';
 import Sandbox from '../../components/sandbox';
+import Video from '../video/video_container';
 
 class LoginContainer extends Component {
   static propTypes = {
@@ -37,15 +39,18 @@ class LoginContainer extends Component {
   }
 
   handleOnBeforeUnLoadIFrame(e) {
-    // this.props.dispatch();
-    console.log(`>>>>> ${ e }`);
-    const iframeDOM = document.getElementsByClassName('sandbox-container')[0];
-    iframeDOM.addEventListener('DOMContentLoaded', () => {
-      console.log('PUTO DIEGO');
-    });
+    if (e.data.auth) {
+      this.props.dispatch(receiveLogin(e.data.user));
+    } else {
+      this.props.dispatch(processError(<FormattedMessage id='login.auth.error' />));
+    }
   }
 
   render() {
+    if (this.props.isAuthenticated) {
+      return <Video />;
+    }
+
     return (
       <div className='container-login'>
         <Login

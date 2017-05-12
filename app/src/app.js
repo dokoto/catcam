@@ -6,11 +6,16 @@ import { IntlProvider } from 'react-intl';
 import thunk from 'redux-thunk';
 import reducers from './modules/root/root_reducers';
 import Router from './modules/root/root_router';
-import logger from './helpers/logger';
+import logger from './helpers/middleware/logger';
+import sockets from './helpers/middleware/sockets';
+import videoBuffer from './helpers/middleware/videoBuffer';
 import en from '../assets/locales/en.json';
 
 console.log('ENVIRONMENT VARS %s %s %s %s %s', TARGET, PLATFORM, VERSION, REST_API, LANGUAJE);
-const store = createStore(reducers, applyMiddleware(thunk, logger));
+const store = createStore(
+  reducers,
+  applyMiddleware(thunk, logger, sockets, videoBuffer)
+);
 
 ReactDOM.render(
   <Provider store={ store }>

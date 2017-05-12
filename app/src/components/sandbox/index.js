@@ -16,12 +16,13 @@ export default class Login extends Component {
   };
 
   componentDidMount() {
-    const iframeDOM = document.getElementsByClassName('sandbox-container')[0].contentWindow;
-    iframeDOM.onbeforeunload = this.iframeOnBeforeUnLoad.bind(this);
+    window.addEventListener('message', this.iframeOnBeforeUnLoad.bind(this), false);
   }
 
   iframeOnBeforeUnLoad(e) {
-    this.props.onbeforeunload(e);
+    if (e.data.type && e.data.type === 'CATCAM_AUTH') {
+      this.props.onbeforeunload(e);
+    }
   }
 
   render() {
