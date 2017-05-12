@@ -7,6 +7,8 @@ export const VIDEO_BUFFER_CONNECTED = 'VIDEO_BUFFER_CONNECTED';
 export const VIDEO_BUFFER_DISCONNET = 'VIDEO_BUFFER_DISCONNET';
 export const VIDEO_BUFFER_DISCONNECTED = 'VIDEO_BUFFER_DISCONNECTED';
 
+export const VIDEO_BUFFER_ADD_CHUNK = 'VIDEO_BUFFER_ADD_CHUNK';
+
 export const VIDEO_BUFFER_ERROR = 'VIDEO_BUFFER_ERROR';
 
 const MIME_CODEC = 'video/webm; codecs="vp8"';
@@ -17,9 +19,10 @@ let mediaSource = null;
 let mediaSourceBuffer = null;
 const queue = [];
 
-export function requestVideoBufferConnection() {
+export function requestVideoBufferConnection(tagName) {
   return {
     type: VIDEO_BUFFER_CONNECT,
+    tagName,
   };
 }
 
@@ -29,21 +32,29 @@ export function requestVideoBufferDisConnection() {
   };
 }
 
-export function requestVideoBufferConnected() {
+export function videoBufferConnected() {
   return {
     type: VIDEO_BUFFER_CONNECTED,
   };
 }
 
-export function requestVideoBufferDisConnected() {
+export function videoBufferDisConnected() {
   return {
     type: VIDEO_BUFFER_DISCONNECTED,
   };
 }
 
-export function videoBufferError() {
+export function videoBufferAddChunk(chunk) {
+  return {
+    type: VIDEO_BUFFER_ADD_CHUNK,
+    chunk,
+  };
+}
+
+export function videoBufferError(error) {
   return {
     type: VIDEO_BUFFER_ERROR,
+    error,
   };
 }
 
@@ -63,34 +74,46 @@ function mediaSourceBufferUpdate() {
   }
 }
 
-function mediaSourceOpen() {
+function mediaSourceOpen(store) {
   mediaSourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
   mediaSourceBuffer.mode = BUFFER_MODE;
   mediaSourceBuffer.addEventListener('update', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('updateend', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('error', mediaSourceBufferError.bind(this));
+  store.dispatch(videoBufferConnected());
 }
-
 
 export default store => next => action => {
   try {
     switch (action.type) {
       case VIDEO_BUFFER_CONNECT:
-        video = action.el;
-        mediaSource = new MediaSource();
-        video.src = window.URL.createObjectURL(mediaSource);
+        if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
+          video = document.getElementById(action.tagName);
+          mediaSource = new MediaSource();
+          video.src = window.URL.createObjectURL(mediaSource);
 
-        mediaSource.addEventListener('sourceopen', mediaSourceOpen.bind(this), false);
-        mediaSource.addEventListener('sourceend', mediaSourceEnd.bind(this), false);
-        mediaSource.addEventListener('sourceclose', mediaSourceClose.bind(this), false);
+          mediaSource.addEventListener('sourceopen', mediaSourceOpen.bind(this, store), false);
+          mediaSource.addEventListener('sourceend', mediaSourceEnd.bind(this), false);
+          mediaSource.addEventListener('sourceclose', mediaSourceClose.bind(this), false);
+        } else {
+          store.dispatch(videoBufferError(<FormattedMessage id='videobuffer.connection.error' />));
+        }
         break;
       case VIDEO_BUFFER_DISCONNECTED:
+        break;
+      case VIDEO_BUFFER_ADD_CHUNK:
+        if (mediaSourceBuffer.updating || queue.length > 0) {
+          queue.push(new Uint8Array(action.chunk));
+        } else {
+          mediaSourceBuffer.appendBuffer(new Uint8Array(action.chunk));
+          video.play();
+        }
         break;
       default:
         return next(action);
     }
   } catch (err) {
-    store.dispatch(videoBufferError(<FormattedMessage id='socket.auth.error' />));
+    store.dispatch(videoBufferError(<FormattedMessage id='videobuffer.connection.error' />));
   }
   return next(action);
 };
