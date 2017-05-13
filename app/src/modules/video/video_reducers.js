@@ -3,7 +3,11 @@ import { VIDEO_BUFFER_CONNECTED } from '../../helpers/middleware/videoBuffer';
 
 const defaultState = {
   playing: false,
+  socketStarted: false,
+  socketConnected: false,
   bufferLoaded: false,
+  socketUrl: '',
+  tagName: '',
   channel: '',
   type: 'webcam',
   sources: {
@@ -27,14 +31,22 @@ export default (state = defaultState, action) => {
 
     case VIDEO_BUFFER_CONNECTED:
       return {
+        ...state,
         bufferLoaded: true,
+        tagName: action.tagName,
       };
 
-    case actions.VIDEO_CHANNEL_RECIEVED:
+    case actions.SOCKET_CONNECTED:
       return {
         ...state,
-        channel: action.channel,
-        bufferLoaded: true,
+        socketUrl: action.socketUrl,
+        socketConnected: true,
+      };
+
+    case actions.SOCKET_STREAM_STARTED:
+      return {
+        ...state,
+        socketStarted: true,
       };
 
     case actions.VIDEO_BUFFER_ERROR || actions.VIDEO_ERROR:

@@ -49,11 +49,11 @@ module.exports = env => {
       },
     }),
     new webpack.DefinePlugin({
-      TARGET: env.target,
-      PLATFORM: env.platform,
-      VERSION: env.version,
-      REST_API: env.target === "'dev'" ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
-      LANGUAJE: env.languaje,
+      TARGET: JSON.stringify(env.target),
+      PLATFORM: JSON.stringify(env.platform),
+      VERSION: JSON.stringify(env.version),
+      REST_API: env.target === 'dev' ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
+      LANGUAJE: JSON.stringify(env.languaje),
     }),
   ];
 

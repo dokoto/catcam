@@ -16,52 +16,53 @@ export const SOCKET_STREAM_STARTED = 'SOCKET_STREAM_STARTED';
 export const SOCKET_ERROR = 'SOCKET_ERROR';
 let ws = null;
 
-export function requestConnection(url) {
+export function requestSocketConnection(sockUrl) {
   return {
     type: SOCKET_CONNECT,
-    url,
+    sockUrl,
   };
 }
 
-export function requestDisconection() {
+export function requestSocketDisconection() {
   return {
     type: SOCKET_DISCONNECT,
   };
 }
 
-export function requestJoin(channel) {
+export function requestSocketJoin(channel) {
   return {
     type: SOCKET_JOIN,
     channel,
   };
 }
 
-export function requestStartStream(channel) {
+export function requestSocketStartStream(channel) {
   return {
     type: SOCKET_START_STREAM,
     channel,
   };
 }
 
-export function requestStreamStarted() {
+export function requestSocketStreamStarted() {
   return {
     type: SOCKET_STREAM_STARTED,
   };
 }
 
-export function connected() {
+export function socketConnected(socketUrl) {
   return {
     type: SOCKET_CONNECTED,
+    socketUrl,
   };
 }
 
-export function disconnected() {
+export function socketDisconnected() {
   return {
     type: SOCKET_DISCONNECTED,
   };
 }
 
-export function joined() {
+export function socketJoined() {
   return {
     type: SOCKET_JOINED,
   };
@@ -81,8 +82,10 @@ export function socketError(error) {
   };
 }
 
-function onConnected(store) {
-  store.dispatch(connected());
+function onConnected(store, socketUrl) {
+  const state = store.getState();
+  store.dispatch(socketConnected(socketUrl));
+  store.dispatch(requestSocketStartStream(state.stream.channel));
 }
 
 function onChunk(store, buffer) {
@@ -93,21 +96,21 @@ export default store => next => action => {
   try {
     switch (action.type) {
       case SOCKET_CONNECT:
-        ws = io.connect(action.url);
-        ws.on('connect', onConnected.bind(this, store));
+        ws = io.connect(action.socketUrl);
+        ws.on('connect', onConnected.bind(this, store, action.socketUrl));
         ws.on('onChunk', onChunk.bind(this, store));
         break;
       case SOCKET_DISCONNECT:
         if (ws) ws.close();
-        store.dispatch(disconnected());
+        store.dispatch(socketDisconnected());
         break;
       case SOCKET_JOIN:
         ws.emit('join', action.channel);
-        store.dispatch(joined());
+        store.dispatch(socketJoined());
         break;
       case SOCKET_START_STREAM:
         ws.emit('start', action.channel);
-        store.dispatch(requestStreamStarted());
+        store.dispatch(requestSocketStreamStarted());
         break;
       default:
         return next(action);

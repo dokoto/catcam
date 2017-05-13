@@ -27,20 +27,11 @@ export function requestStartStream() {
 
 export function initVideo(tagName) {
   return dispatch => {
-    dispatch(requestVideoBufferConnection(tagName));
     return fetch(`${ REST_API }/stream`)
-      .then(response => {
-        response.json().then(json => {
-          try {
-            if (json.auth) {
-              dispatch(videoChannelRecieved(json.channel));
-            } else {
-              dispatch(videoError({ auth: json.auth }));
-            }
-          } catch (err) {
-            dispatch(videoError(err));
-          }
-        });
+      .then(response => response.json())
+      .then(json => {
+        dispatch(videoChannelRecieved(json.channel));
+        dispatch(requestVideoBufferConnection(tagName));
       })
       .catch(err => {
         dispatch(videoError(err));

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { requestSocketConnection } from './sockets';
 
 export const VIDEO_BUFFER_CONNECT = 'VIDEO_BUFFER_CONNECT';
 export const VIDEO_BUFFER_CONNECTED = 'VIDEO_BUFFER_CONNECTED';
@@ -32,9 +33,10 @@ export function requestVideoBufferDisConnection() {
   };
 }
 
-export function videoBufferConnected() {
+export function videoBufferConnected(tagName) {
   return {
     type: VIDEO_BUFFER_CONNECTED,
+    tagName,
   };
 }
 
@@ -58,15 +60,9 @@ export function videoBufferError(error) {
   };
 }
 
-function mediaSourceEnd() {}
-
-function mediaSourceClose() {}
-
-function mediaSourceEnd() {}
-
-function mediaSourceClose() {}
-
-function mediaSourceBufferError() {}
+function mediaSourceBufferError(store, error) {
+  store.dispatch(videoBufferError(error));
+}
 
 function mediaSourceBufferUpdate() {
   if (queue.length > 0 && !mediaSourceBuffer.updating) {
@@ -74,13 +70,15 @@ function mediaSourceBufferUpdate() {
   }
 }
 
-function mediaSourceOpen(store) {
+function mediaSourceOpen(store, tagName) {
+  const state = store.getState();
   mediaSourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
   mediaSourceBuffer.mode = BUFFER_MODE;
   mediaSourceBuffer.addEventListener('update', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('updateend', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('error', mediaSourceBufferError.bind(this));
-  store.dispatch(videoBufferConnected());
+  store.dispatch(videoBufferConnected(tagName));
+  store.dispatch(requestSocketConnection(`${ REST_API }/${ state.steam.channel }`));
 }
 
 export default store => next => action => {
@@ -91,10 +89,7 @@ export default store => next => action => {
           video = document.getElementById(action.tagName);
           mediaSource = new MediaSource();
           video.src = window.URL.createObjectURL(mediaSource);
-
-          mediaSource.addEventListener('sourceopen', mediaSourceOpen.bind(this, store), false);
-          mediaSource.addEventListener('sourceend', mediaSourceEnd.bind(this), false);
-          mediaSource.addEventListener('sourceclose', mediaSourceClose.bind(this), false);
+          mediaSource.addEventListener('sourceopen', mediaSourceOpen.bind(this, store, action.tagName), false);
         } else {
           store.dispatch(videoBufferError(<FormattedMessage id='videobuffer.connection.error' />));
         }
@@ -106,7 +101,6 @@ export default store => next => action => {
           queue.push(new Uint8Array(action.chunk));
         } else {
           mediaSourceBuffer.appendBuffer(new Uint8Array(action.chunk));
-          video.play();
         }
         break;
       default:
