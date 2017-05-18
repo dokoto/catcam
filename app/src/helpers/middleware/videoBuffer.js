@@ -71,14 +71,13 @@ function mediaSourceBufferUpdate() {
 }
 
 function mediaSourceOpen(store, tagName) {
-  const state = store.getState();
   mediaSourceBuffer = mediaSource.addSourceBuffer(MIME_CODEC);
   mediaSourceBuffer.mode = BUFFER_MODE;
   mediaSourceBuffer.addEventListener('update', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('updateend', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('error', mediaSourceBufferError.bind(this));
   store.dispatch(videoBufferConnected(tagName));
-  store.dispatch(requestSocketConnection(`${ REST_API }/${ state.steam.channel }`));
+  store.dispatch(requestSocketConnection(REST_API));
 }
 
 export default store => next => action => {

@@ -1,12 +1,13 @@
 import * as actions from './video_actions';
-import { VIDEO_BUFFER_CONNECTED } from '../../helpers/middleware/videoBuffer';
+import { VIDEO_BUFFER_CONNECTED, VIDEO_BUFFER_ERROR } from '../../helpers/middleware/videoBuffer';
+import { SOCKET_STREAM_STARTED, SOCKET_CONNECTED } from '../../helpers/middleware/sockets';
 
 const defaultState = {
   playing: false,
   socketStarted: false,
   socketConnected: false,
   bufferLoaded: false,
-  socketUrl: '',
+  ws: '',
   tagName: '',
   channel: '',
   type: 'webcam',
@@ -24,7 +25,7 @@ const defaultState = {
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case actions.INIT_LOGIN:
+    case actions.VIDEO_INIT:
       return {
         ...defaultState,
       };
@@ -36,20 +37,26 @@ export default (state = defaultState, action) => {
         tagName: action.tagName,
       };
 
-    case actions.SOCKET_CONNECTED:
+    case SOCKET_CONNECTED:
       return {
         ...state,
-        socketUrl: action.socketUrl,
+        socketUrl: action.ws,
         socketConnected: true,
       };
 
-    case actions.SOCKET_STREAM_STARTED:
+    case actions.VIDEO_CHANNEL_RECIEVED:
+      return {
+        ...state,
+        channel: action.channel,
+      };
+
+    case SOCKET_STREAM_STARTED:
       return {
         ...state,
         socketStarted: true,
       };
 
-    case actions.VIDEO_BUFFER_ERROR || actions.VIDEO_ERROR:
+    case VIDEO_BUFFER_ERROR || actions.VIDEO_ERROR:
       return {
         ...state,
         playing: false,

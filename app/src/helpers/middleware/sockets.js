@@ -49,10 +49,9 @@ export function requestSocketStreamStarted() {
   };
 }
 
-export function socketConnected(socketUrl) {
+export function socketConnected() {
   return {
     type: SOCKET_CONNECTED,
-    socketUrl,
   };
 }
 
@@ -82,9 +81,10 @@ export function socketError(error) {
   };
 }
 
-function onConnected(store, socketUrl) {
+function onConnected(store) {
   const state = store.getState();
-  store.dispatch(socketConnected(socketUrl));
+  store.dispatch(socketConnected());
+  store.dispatch(requestSocketJoin(state.stream.channel));
   store.dispatch(requestSocketStartStream(state.stream.channel));
 }
 
@@ -96,8 +96,8 @@ export default store => next => action => {
   try {
     switch (action.type) {
       case SOCKET_CONNECT:
-        ws = io.connect(action.socketUrl);
-        ws.on('connect', onConnected.bind(this, store, action.socketUrl));
+        ws = io.connect(action.ws);
+        ws.on('connect', onConnected.bind(this, store, action.ws));
         ws.on('onChunk', onChunk.bind(this, store));
         break;
       case SOCKET_DISCONNECT:

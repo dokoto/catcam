@@ -5,10 +5,11 @@ export const VIDEO_CHANNEL_RECIEVED = 'VIDEO_CHANNEL_RECIEVED';
 export const VIDEO_ERROR = 'VIDEO_ERROR';
 export const VIDEO_START_STREAM = 'VIDEO_START_STREAM';
 
-export function videoChannelRecieved(channel) {
+export function videoChannelRecieved(channel, ws) {
   return {
     type: VIDEO_CHANNEL_RECIEVED,
     channel,
+    ws,
   };
 }
 
@@ -30,7 +31,7 @@ export function initVideo(tagName) {
     return fetch(`${ REST_API }/stream`)
       .then(response => response.json())
       .then(json => {
-        dispatch(videoChannelRecieved(json.channel));
+        dispatch(videoChannelRecieved(json.channel, json.ws));
         dispatch(requestVideoBufferConnection(tagName));
       })
       .catch(err => {

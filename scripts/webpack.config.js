@@ -18,8 +18,17 @@ const LOCAL_IP = Object.keys(ifs)
   .filter(z => z)[0].address;
 const TEST_REST_API = `'http://${ LOCAL_IP }:${ HTTP_PORT }'`;
 
+function normalizeEnvVars(env_vars) {
+  console.log('ENVIRONMENT VARS %s', JSON.stringify(env_vars));
+  for(let key in env_vars) {
+    //console.log('Normalize %s : %s', key, env_vars[key] );
+    env_vars[key] = env_vars[key].replace(/'|"/gi, '');
+  }
+  console.log('NORMALIZED ENVIRONMENT VARS %s', JSON.stringify(env_vars));
+}
+
 module.exports = env => {
-  console.log('ENVIRONMENT VARS %s', JSON.stringify(env));
+  normalizeEnvVars(env);
   const isProduction = env.target === 'prod';
 
   // Common plugins
