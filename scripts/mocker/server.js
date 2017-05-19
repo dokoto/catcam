@@ -6,15 +6,16 @@ const ifs = require('os').networkInterfaces();
 const crypto = require('crypto');
 const format = require('biguint-format');
 const ws = require('socket.io')();
+const spawn = require('child_process').spawn;
 
 const RESP_LOGIN = require('./responses/GET/login');
 const RESP_LOGOUT = require('./responses/GET/logout');
 const RESP_USER_AUTH_SUCCESS = require('./responses/GET/user_auth_success');
 const FFMPEG = require('./responses/GET/ffmpeg');
 
-const WEBSOCKET_PORT = 4445;
-const STREAM_PORT = 8001;
-const HTTP_PORT = 8002;
+const WEBSOCKET_STREAM_PORT = 4445;
+const LOCALONLY_HTTP_STREAM_PORT = 8001;
+const HTTP_RESTFUL_PORT = 8002;
 const LOCAL_IP = Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
   .filter(z => z)[0].address;
@@ -32,13 +33,12 @@ function generateRandHash() {
 let childProcess;
 let WS_CHANNEL;
 let ffmpegCmd = FFMPEG.webm.win;
-ffmpegCmd.push(`http://${ LOCAL_IP }:${ STREAM_PORT }`);
 
 ws.on('connection', sockConn => {
   console.log(
-    'New WebSocket Connection: ',
-    sockConn.conn.remoteAddress,
-    sockConn.client.request.headers['user-agent']
+    `New WebSocket Connection:
+    ${ sockConn.conn.remoteAddress }
+    ${ sockConn.client.request.headers["user-agent"] }`
   );
 
   sockConn.on('close', (code, message) => {
@@ -46,14 +46,18 @@ ws.on('connection', sockConn => {
   });
 
   sockConn.on('join', room => {
-    if (room === WS_CHANNEL) {
-      sockConn.join(room);
+    if (room !== WS_CHANNEL) {
+      console.error(`[MOCKER][JOIN] Error access ${ room } !== ${ WS_CHANNEL }`);
+      return;
     }
+    console.log(`[MOCKER][JOIN] Joining to channel ${ WS_CHANNEL }`);
+    sockConn.join(room);
+    ws.to(WS_CHANNEL).emit('joined');
   });
 
-  sockConn.on('start', room => {
-    if (room !== WS_CHANNEL) {
-      console.error(`[MOCKER] Error access`);
+  sockConn.on('start', (options) => {
+    if (options.channel !== WS_CHANNEL) {
+      console.error(`[MOCKER][START] Error access ${ options.channel } !== ${ WS_CHANNEL }`);
       return;
     }
 
@@ -62,10 +66,14 @@ ws.on('connection', sockConn => {
       setTimeout(() => {
         console.log('Process endded, new process..');
         childProcess = spawn('ffmpeg', ffmpegCmd);
+        ws.to(WS_CHANNEL).emit('restarted');
       }, 1000);
     } else {
+      // ffmpegCmd.push(`-vf scale=${ options.resolution }`);
+      ffmpegCmd.push(`http://${ LOCAL_IP }:${ LOCALONLY_HTTP_STREAM_PORT }`);
       console.log(' COMM: %s', ffmpegCmd.join(' '));
       childProcess = spawn('ffmpeg', ffmpegCmd);
+      ws.to(WS_CHANNEL).emit('started');
     }
   });
 
@@ -111,17 +119,16 @@ app.get('/auth/google', (req, res) => {
   res.render('loginSuccess', { response: RESP_USER_AUTH_SUCCESS });
 });
 
-app.get('/stream', (req, res) => {
+app.get('/info', (req, res) => {
   console.log(`/stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
-  const WS_CHANNEL = generateRandHash();
-  res
-    .status(200)
-    .json({
-      user: RESP_USER_AUTH_SUCCESS.user,
-      auth: true,
-      channel: WS_CHANNEL,
-      ws: `ws://${ PUBLIC_IP }:${ WEBSOCKET_PORT }`,
-    });
+  WS_CHANNEL = generateRandHash();
+  res.status(200).json({
+    user: RESP_USER_AUTH_SUCCESS.user,
+    auth: true,
+    channel: WS_CHANNEL,
+    ws: `ws://${ LOCAL_IP }:${ WEBSOCKET_STREAM_PORT }`,
+    id: require('os').platform() === 'win32' ? FFMPEG.webm.win[9] : FFMPEG.webm.linux[7],
+  });
 });
 
 // ********************************************************
@@ -143,10 +150,14 @@ const videoHttpServer = http.createServer((req, res) => {
 // ********************************************************
 // LISTENERS
 // *********************************************************/
-videoHttpServer.listen(STREAM_PORT, LOCAL_IP);
-ws.listen(WEBSOCKET_PORT);
-http.createServer(app).listen(HTTP_PORT);
+videoHttpServer.listen(LOCALONLY_HTTP_STREAM_PORT, LOCAL_IP);
+ws.listen(WEBSOCKET_STREAM_PORT);
+http.createServer(app).listen(HTTP_RESTFUL_PORT);
 
-console.log('[MOCKER] LOCAL HTTP BROADCAST-VIDEO on http://%s:%s', LOCAL_IP, STREAM_PORT);
-console.log('[MOCKER] PUBLIC WEBSOCKET ws://%s:%d/', LOCAL_IP, WEBSOCKET_PORT);
-console.log('[MOCKER] PUBLIC REST API on http://%s:%s', LOCAL_IP, HTTP_PORT);
+console.log(
+  '[MOCKER] LOCAL HTTP BROADCAST-VIDEO on http://%s:%s',
+  LOCAL_IP,
+  LOCALONLY_HTTP_STREAM_PORT
+);
+console.log('[MOCKER] PUBLIC WEBSOCKET ws://%s:%d/', LOCAL_IP, WEBSOCKET_STREAM_PORT);
+console.log('[MOCKER] PUBLIC REST API on http://%s:%s', LOCAL_IP, HTTP_RESTFUL_PORT);
