@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const format = require('biguint-format');
 const ws = require('socket.io')();
 const spawn = require('child_process').spawn;
+const os = require('os');
 
 const RESP_LOGIN = require('./responses/GET/login');
 const RESP_LOGOUT = require('./responses/GET/logout');
@@ -32,7 +33,7 @@ function generateRandHash() {
 // *********************************************************/
 let childProcess;
 let WS_CHANNEL;
-let ffmpegCmd = FFMPEG.webm.win;
+let ffmpegCmd = os.platform() === 'win32' ? FFMPEG.webm.win : FFMPEG.webm.linux;
 
 ws.on('connection', sockConn => {
   console.log(
@@ -69,7 +70,8 @@ ws.on('connection', sockConn => {
         ws.to(WS_CHANNEL).emit('restarted');
       }, 1000);
     } else {
-      // ffmpegCmd.push(`-vf scale=${ options.resolution }`);
+      console.log(options);
+      ffmpegCmd.splice(ffmpegCmd.indexOf('-video_size')+1, 0, options.resolution);
       ffmpegCmd.push(`http://${ LOCAL_IP }:${ LOCALONLY_HTTP_STREAM_PORT }`);
       console.log(' COMM: %s', ffmpegCmd.join(' '));
       childProcess = spawn('ffmpeg', ffmpegCmd);
@@ -127,7 +129,7 @@ app.get('/info', (req, res) => {
     auth: true,
     channel: WS_CHANNEL,
     ws: `ws://${ LOCAL_IP }:${ WEBSOCKET_STREAM_PORT }`,
-    id: require('os').platform() === 'win32' ? FFMPEG.webm.win[9] : FFMPEG.webm.linux[7],
+    id: os.platform() === 'win32' ? FFMPEG.webm.win[9] : FFMPEG.webm.linux[7],
   });
 });
 

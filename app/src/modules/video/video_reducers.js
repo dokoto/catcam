@@ -34,11 +34,6 @@ const defaultState = {
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case actions.VIDEO_INIT:
-      return {
-        ...defaultState,
-        resolution: `${ window.innerWidth }:${ window.innerHeight }`,
-      };
 
     case VIDEO_BUFFER_CONNECTED:
       return {
@@ -59,6 +54,7 @@ export default (state = defaultState, action) => {
         ws: action.ws,
         channel: action.channel,
         id: action.id,
+        resolution: (window.innerHeight > window.innerWidth) ? `${ window.innerHeight }:${ window.innerWidth }` : `${ window.innerWidth }:${ window.innerHeight }`,
       };
 
     case SOCKET_STREAM_STARTED:
