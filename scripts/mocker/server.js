@@ -71,18 +71,22 @@ ws.on('connection', sockConn => {
     }
 
     if (childProcess) {
+      console.log(`[MOCKER] FFMPEG killing pid ${ childProcess.pid }`);
       childProcess.kill('SIGKILL');
       setTimeout(() => {
         console.log('Process endded, new process..');
+        console.log('[MOCKER] COMM: %s', ffmpegCmd.join(' '));
         childProcess = spawn('ffmpeg', ffmpegCmd);
+        console.log(`[MOCKER] FFMPEG new pid ${ childProcess.pid }`);
         ws.to(WS_CHANNEL).emit('restarted');
       }, 1000);
     } else {
       console.log(options);
       ffmpegCmd.splice(ffmpegCmd.indexOf('-video_size')+1, 0, options.resolution);
       ffmpegCmd.push(`http://${ LOCAL_IP }:${ LOCALONLY_HTTP_STREAM_PORT }`);
-      console.log(' COMM: %s', ffmpegCmd.join(' '));
+      console.log('[MOCKER] COMM: %s', ffmpegCmd.join(' '));
       childProcess = spawn('ffmpeg', ffmpegCmd);
+      console.log(`[MOCKER] FFMPEG new pid ${ childProcess.pid }`);
       ws.to(WS_CHANNEL).emit('started');
     }
   });
@@ -131,7 +135,8 @@ app.get('/auth/google', (req, res) => {
 
 app.get('/info', (req, res) => {
   console.log(`/stream: ${ req.socket.remoteAddress }:${ req.socket.remotePort }`);
-  WS_CHANNEL = generateRandHash();
+  if (!WS_CHANNEL) WS_CHANNEL = generateRandHash();
+
   res.status(200).json({
     user: RESP_USER_AUTH_SUCCESS.user,
     auth: true,
