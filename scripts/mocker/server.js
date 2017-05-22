@@ -8,6 +8,7 @@ const format = require('biguint-format');
 const ws = require('socket.io')();
 const spawn = require('child_process').spawn;
 const os = require('os');
+const Camera = require ('./camera');
 
 const RESP_LOGIN = require('./responses/GET/login');
 const RESP_LOGOUT = require('./responses/GET/logout');
@@ -27,6 +28,13 @@ function generateRandHash() {
   hash.update(format(x, 'dec'));
   return hash.digest('hex');
 }
+
+let RESOLUTIONS = [];
+const camera = new Camera();
+camera.resolutions().then(res =>  {
+  console.log(`[MOCKER][RESOLUTIONS] ${ res.join() }`);
+  RESOLUTIONS = res;
+});
 
 // ********************************************************
 // WEBSOCKET SERVER
@@ -128,6 +136,7 @@ app.get('/info', (req, res) => {
     user: RESP_USER_AUTH_SUCCESS.user,
     auth: true,
     channel: WS_CHANNEL,
+    resolutions: RESOLUTIONS,
     ws: `ws://${ LOCAL_IP }:${ WEBSOCKET_STREAM_PORT }`,
     id: os.platform() === 'win32' ? FFMPEG.webm.win[9] : FFMPEG.webm.linux[7],
   });

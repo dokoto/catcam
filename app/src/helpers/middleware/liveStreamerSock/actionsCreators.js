@@ -41,13 +41,6 @@ export function requestSocketStartStream(channel, resolution) {
   };
 }
 
-export function requestSocketReStartStream(channel) {
-  return {
-    type: actions.SOCKET_STREAM_RESTARTED,
-    channel,
-  };
-}
-
 export function videoBufferConnected(tagName) {
   return {
     type: actions.VIDEO_BUFFER_CONNECTED,

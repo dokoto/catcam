@@ -15,20 +15,13 @@ const defaultState = {
   tagName: '',
   channel: '',
   type: 'webcam',
-  sources: {
-    cam0: {
-      id: '/dev/video0',
-      resolutions: ['640x480', '800x600'],
-      type: 'webcam',
-    },
-    cam1: {
-      id: 'video=Integrated Camera',
-      resolutions: ['640x480', '800x600'],
-      type: 'webcam',
-    },
-  },
   id: '/dev/video0',
-  resolution: '640:480',
+  resolution: '640x480',
+  resolutions: [],
+  quality: {
+    max: 0,
+    current: 0,
+  },
   orientation: 'landscape',
 };
 
@@ -54,7 +47,9 @@ export default (state = defaultState, action) => {
         ws: action.ws,
         channel: action.channel,
         id: action.id,
-        resolution: (window.innerHeight > window.innerWidth) ? `${ window.innerHeight }:${ window.innerWidth }` : `${ window.innerWidth }:${ window.innerHeight }`,
+        resolutions: action.resolutions,
+        quality: action.quality,
+        resolution: action.resolutions[action.quality.current],
       };
 
     case SOCKET_STREAM_STARTED:

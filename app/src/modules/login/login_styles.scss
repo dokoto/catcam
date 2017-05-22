@@ -1,22 +1,46 @@
 @import '../../../assets/styles/shake';
 
-.container-login {
-  background-image: url('../../../assets/img/login_bg.jpg');
-  background-repeat: no-repeat;
-  background-size: cover;
-  filter: grayscale(90%);
-  height: 100%;
+
+@media screen and (orientation: portrait) {
+  .container-login {
+    background-image: url('../../../assets/img/login_bg_bw_portrait.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+  }
+
+  .login-link {
+    position: absolute;
+    bottom: 10%;
+    width: 100%;
+    padding: 7%;
+    text-align: center;
+    color: black;
+    font-size: x-large;
+    font-weight: bold;
+    text-decoration: none;
+    font-family: raleway;
+  }
 }
 
-.login-link {
-  position: absolute;
-  bottom: 10%;
-  width: 100%;
-  padding: 7%;
-  text-align: center;
-  color: black;
-  font-size: x-large;
-  font-weight: bold;
-  text-decoration: none;
-  font-family: raleway;
+@media screen and (orientation: landscape) {
+  .container-login {
+    background-image: url('../../../assets/img/login_bg_bw_landscape.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+  }
+
+  .login-link {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 5%;
+    text-align: center;
+    color: black;
+    font-size: x-large;
+    font-weight: bold;
+    text-decoration: none;
+    font-family: raleway;
+  }
 }

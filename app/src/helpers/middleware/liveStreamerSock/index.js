@@ -11,7 +11,7 @@ let video = null;
 let mediaSource = null;
 let mediaSourceBuffer = null;
 let ws = null;
-const queue = [];
+let queue = [];
 
 function mediaSourceBufferError(store, error) {
   store.dispatch(actionsCreators.videoBufferError(error));
@@ -29,7 +29,7 @@ function mediaSourceOpen(store, tagName) {
   mediaSourceBuffer.mode = BUFFER_MODE;
   mediaSourceBuffer.addEventListener('update', mediaSourceBufferUpdate.bind(this));
   mediaSourceBuffer.addEventListener('updateend', mediaSourceBufferUpdate.bind(this));
-  mediaSourceBuffer.addEventListener('error', mediaSourceBufferError.bind(this));
+  mediaSourceBuffer.addEventListener('error', mediaSourceBufferError.bind(this, store));
   store.dispatch(actionsCreators.videoBufferConnected(tagName));
   store.dispatch(actionsCreators.requestSocketConnection(state.stream.ws));
 }
@@ -61,13 +61,31 @@ function onStarted(store) {
 }
 
 function onRestart(store) {
-  store.dispatch(actionsCreators.requestSocketReStartStream());
+  store.dispatch(actionsCreators.requestSocketStreamStarted());
+}
+
+function clean() {
+  video = null;
+  if (mediaSource) {
+    mediaSource.removeAllListeners('sourceopen');
+  }
+  mediaSource = null;
+  mediaSourceBuffer = null;
+  if (ws) {
+    ws.removeAllListeners('connect');
+    ws.removeAllListeners('onChunk');
+    ws.removeAllListeners('joined');
+    ws.removeAllListeners('restarted');
+  }
+  ws = null;
+  queue = [];
 }
 
 export default store => next => action => {
   try {
     switch (action.type) {
       case actions.VIDEO_BUFFER_CONNECT:
+        clean();
         if ('MediaSource' in window && MediaSource.isTypeSupported(MIME_CODEC)) {
           video = document.getElementById(action.tagName);
           mediaSource = new MediaSource();

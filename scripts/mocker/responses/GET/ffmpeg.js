@@ -1,6 +1,8 @@
-
-
 module.exports = {
+  resolutions: {
+    linux: ['-f', 'dshow', '-list_options', 'true', '-i', '/dev/video0'],
+    win: ['-f', 'dshow', '-list_options', 'true', '-i', 'video=Integrated Camera'],
+  },
   webm: {
     linux: [
       '-f',
@@ -8,7 +10,6 @@ module.exports = {
       '-framerate',
       '25',
       '-video_size',
-      //'640x480',
       '-i',
       '/dev/video0',
       '-vcodec',
@@ -39,7 +40,6 @@ module.exports = {
       '-framerate',
       '25',
       '-video_size',
-      //'640x480',
       '-i',
       'video=Integrated Camera',
       '-vcodec',
