@@ -1,5 +1,6 @@
 import * as actions from './video_actions';
 import {
+  VIDEO_BUFFER_CONNECT,
   VIDEO_BUFFER_CONNECTED,
   VIDEO_BUFFER_ERROR,
   SOCKET_STREAM_STARTED,
@@ -27,6 +28,15 @@ const defaultState = {
 
 export default (state = defaultState, action) => {
   switch (action.type) {
+    case VIDEO_BUFFER_CONNECT:
+      return {
+        ...state,
+        playing: false,
+        socketStarted: false,
+        socketConnected: false,
+        bufferLoaded: false,
+        tagName: action.tagName,
+      };
 
     case VIDEO_BUFFER_CONNECTED:
       return {
@@ -56,12 +66,15 @@ export default (state = defaultState, action) => {
       return {
         ...state,
         socketStarted: true,
+        playing: true,
       };
 
     case VIDEO_BUFFER_ERROR || actions.VIDEO_ERROR:
       return {
         ...state,
         playing: false,
+        bufferLoaded: false,
+        socketStarted: false,
         error: action.error,
       };
 

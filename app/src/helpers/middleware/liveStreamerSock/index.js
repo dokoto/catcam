@@ -40,6 +40,17 @@ function onConnected(store) {
   store.dispatch(actionsCreators.requestSocketJoin(state.stream.channel));
 }
 
+function onDisconnected(store) {
+  const state = store.getState();
+  if (state.stream.playing) {
+    store.dispatch(actionsCreators.requestVideoBufferConnection(state.stream.tagName));
+  }
+}
+
+function onReconnected() {
+  console.log('>>>> CLIENT RECONNECTING');
+}
+
 function onChunk(store, chunk) {
   if (mediaSourceBuffer.updating || queue.length > 0) {
     queue.push(new Uint8Array(chunk));
@@ -67,7 +78,7 @@ function onRestart(store) {
 function clean() {
   video = null;
   if (mediaSource) {
-    mediaSource.removeAllListeners('sourceopen');
+    mediaSource.removeEventListener('sourceopen', mediaSourceOpen, false);
   }
   mediaSource = null;
   mediaSourceBuffer = null;
@@ -104,6 +115,8 @@ export default store => next => action => {
       case actions.SOCKET_CONNECT:
         ws = io.connect(action.ws);
         ws.on('connect', onConnected.bind(this, store, action.ws));
+        ws.on('disconnect', onDisconnected.bind(this, store, action.ws));
+        ws.on('reconnecting', onReconnected.bind(this, store, action.ws));
         ws.on('onChunk', onChunk.bind(this, store));
         ws.on('joined', onJoined.bind(this, store));
         ws.on('started', onStarted.bind(this, store));
