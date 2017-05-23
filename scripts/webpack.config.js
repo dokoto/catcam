@@ -20,8 +20,7 @@ const TEST_REST_API = `'http://${ LOCAL_IP }:${ HTTP_PORT }'`;
 
 function normalizeEnvVars(env_vars) {
   console.log('ENVIRONMENT VARS %s', JSON.stringify(env_vars));
-  for(let key in env_vars) {
-    //console.log('Normalize %s : %s', key, env_vars[key] );
+  for (const key in env_vars) {
     env_vars[key] = env_vars[key].replace(/'|"/gi, '');
   }
   console.log('NORMALIZED ENVIRONMENT VARS %s', JSON.stringify(env_vars));
@@ -63,6 +62,9 @@ module.exports = env => {
       VERSION: JSON.stringify(env.version),
       REST_API: env.target === 'dev' ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
       LANGUAJE: JSON.stringify(env.languaje),
+      "process.env": {
+        NODE_ENV: env.target === 'dev' ? JSON.stringify("development") : JSON.stringify("production")
+      }
     }),
   ];
 
@@ -82,7 +84,7 @@ module.exports = env => {
       test: /.*\.(woff|woff2|eot|ttf)$/i,
       include: fontsPath,
       use: 'file-loader?hash=sha512&digest=hex&name=./assets/[hash].[ext]',
-    }
+    },
   ];
 
   if (isProduction) {
@@ -115,10 +117,8 @@ module.exports = env => {
     // Production rules
     rules.push({
       test: /\.scss$/,
-      loader: ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: 'css-loader!postcss-loader!sass-loader',
-      }),
+      exclude: /node_modules/,
+      use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader?sourceMap'],
     });
   } else {
     // Development plugins
@@ -132,7 +132,7 @@ module.exports = env => {
     });
   }
 
-  let webPackConf = {
+  const webPackConf = {
     devtool: isProduction ? false : 'source-map',
     context: jsSourcePath,
     entry: {

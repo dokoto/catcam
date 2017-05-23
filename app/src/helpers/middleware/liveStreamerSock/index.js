@@ -47,8 +47,11 @@ function onDisconnected(store) {
   }
 }
 
-function onReconnected() {
-  console.log('>>>> CLIENT RECONNECTING');
+function onReconnected(store) {
+  const state = store.getState();
+  if (state.stream.playing) {
+    store.dispatch(actionsCreators.requestVideoBufferReConnection());
+  }
 }
 
 function onChunk(store, chunk) {

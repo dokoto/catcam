@@ -13,6 +13,12 @@ export function requestVideoBufferDisConnection() {
   };
 }
 
+export function requestVideoBufferReConnection() {
+  return {
+    type: actions.VIDEO_BUFFER_RECONNECTING,
+  };
+}
+
 export function requestSocketConnection(sockUrl) {
   return {
     type: actions.SOCKET_CONNECT,

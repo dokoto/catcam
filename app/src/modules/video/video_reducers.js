@@ -5,6 +5,7 @@ import {
   VIDEO_BUFFER_ERROR,
   SOCKET_STREAM_STARTED,
   SOCKET_CONNECTED,
+  VIDEO_BUFFER_RECONNECTING,
 } from '../../helpers/middleware/liveStreamerSock/actions';
 
 const defaultState = {
@@ -67,6 +68,14 @@ export default (state = defaultState, action) => {
         ...state,
         socketStarted: true,
         playing: true,
+      };
+
+    case VIDEO_BUFFER_RECONNECTING:
+      return {
+        ...state,
+        playing: false,
+        bufferLoaded: false,
+        socketStarted: false,
       };
 
     case VIDEO_BUFFER_ERROR || actions.VIDEO_ERROR:

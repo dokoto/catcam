@@ -5,5 +5,6 @@
   "sandbox.iframe.nosupported": "Your browser does not support iframes.",
   "livestreamerscok.video.error": "Video streaming error",
   "livestreamerscok.socket.error": "WebSocket error",
-  "livestreamerscok.error": "Livre video error"
+  "livestreamerscok.error": "Livre video error",
+  "video.reconnecting": "Reconnectiong..."
 }
