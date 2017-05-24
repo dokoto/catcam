@@ -72,7 +72,6 @@ function onConnected(store) {
 
 function onDisconnected(store) {
   const state = store.getState();
-  cleanWebSocket();
   if (state.stream.playing) {
     store.dispatch(actionsCreators.initLiveStreaming(state.stream.tagName, state.stream.ws));
   }
