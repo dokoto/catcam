@@ -1,15 +1,16 @@
 import {
-  requestVideoBufferConnection,
+  initLiveStreaming,
 } from '../../helpers/middleware/liveStreamerSock/actionsCreators';
 
 export const VIDEO_INIT = 'VIDEO_INIT';
-export const VIDEO_INFO_RECIEVED = 'VIDEO_CHANNEL_RECIEVED';
+export const VIDEO_INFO_RECIEVED = 'VIDEO_INFO_RECIEVED';
 export const VIDEO_ERROR = 'VIDEO_ERROR';
 export const VIDEO_START_STREAM = 'VIDEO_START_STREAM';
 
-export function videoInfoRecieved(channel, ws, id, resolutions, quality) {
+export function videoInfoRecieved(email, channel, ws, id, resolutions, quality) {
   return {
     type: VIDEO_INFO_RECIEVED,
+    email,
     channel,
     ws,
     id,
@@ -46,12 +47,12 @@ export function initVideo(tagName) {
           })
           .filter(item => item !== '0x0');
         dispatch(
-          videoInfoRecieved(json.channel, json.ws, json.id, validResolitions, {
+          videoInfoRecieved(json.user.email, json.channel, json.ws, json.id, validResolitions, {
             max: validResolitions.length,
             current: Math.round(validResolitions.length / 2),
           })
         );
-        dispatch(requestVideoBufferConnection(tagName));
+        dispatch(initLiveStreaming(tagName, json.ws));
       })
       .catch(err => {
         dispatch(videoError(err));

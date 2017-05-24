@@ -29,6 +29,7 @@ function normalizeEnvVars(env_vars) {
 module.exports = env => {
   normalizeEnvVars(env);
   const isProduction = env.target === 'prod';
+  console.log(`Compiling for ${ env.target === 'dev' ? JSON.stringify("development") : JSON.stringify("production") }`);
 
   // Common plugins
   const plugins = [
@@ -60,7 +61,7 @@ module.exports = env => {
       TARGET: JSON.stringify(env.target),
       PLATFORM: JSON.stringify(env.platform),
       VERSION: JSON.stringify(env.version),
-      REST_API: env.target === 'dev' ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
+      REST_API: env.env === 'dev' ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
       LANGUAJE: JSON.stringify(env.languaje),
       "process.env": {
         NODE_ENV: env.target === 'dev' ? JSON.stringify("development") : JSON.stringify("production")
@@ -87,7 +88,11 @@ module.exports = env => {
     },
   ];
 
+  let entries = [];
   if (isProduction) {
+    entries = [
+      'app.js'
+    ];
     // Production plugins
     plugins.push(
       new webpack.LoaderOptionsPlugin({
@@ -121,8 +126,14 @@ module.exports = env => {
       use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader?sourceMap'],
     });
   } else {
+    entries = [
+      'react-hot-loader/patch',
+      'webpack-dev-server/client?http://localhost:3000',
+      'webpack/hot/only-dev-server',
+      'app.js'
+    ];
     // Development plugins
-    plugins.push(new webpack.HotModuleReplacementPlugin(), new DashboardPlugin());
+    plugins.push(new webpack.HotModuleReplacementPlugin(), new webpack.NamedModulesPlugin(), new DashboardPlugin());
 
     // Development rules
     rules.push({
@@ -135,12 +146,10 @@ module.exports = env => {
   const webPackConf = {
     devtool: isProduction ? false : 'source-map',
     context: jsSourcePath,
-    entry: {
-      js: 'app.js',
-    },
+    entry: entries,
     output: {
       path: buildPath,
-      publicPath: '/',
+      publicPath: isProduction ? './' : '/',
       filename: 'app-[hash].js',
     },
     module: {

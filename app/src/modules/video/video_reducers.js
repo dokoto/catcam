@@ -1,5 +1,6 @@
 import * as actions from './video_actions';
 import {
+  INIT_LIVE_STREAMING,
   VIDEO_BUFFER_CONNECT,
   VIDEO_BUFFER_CONNECTED,
   VIDEO_BUFFER_ERROR,
@@ -18,6 +19,7 @@ const defaultState = {
   channel: '',
   type: 'webcam',
   id: '/dev/video0',
+  email: '',
   resolution: '640x480',
   resolutions: [],
   quality: {
@@ -29,12 +31,21 @@ const defaultState = {
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case VIDEO_BUFFER_CONNECT:
+    case INIT_LIVE_STREAMING: {
       return {
         ...state,
         playing: false,
         socketStarted: false,
         socketConnected: false,
+        bufferLoaded: false,
+        tagName: action.tagName,
+        ws: action.ws,
+      };
+    }
+    case VIDEO_BUFFER_CONNECT:
+      return {
+        ...state,
+        playing: false,
         bufferLoaded: false,
         tagName: action.tagName,
       };
@@ -55,6 +66,7 @@ export default (state = defaultState, action) => {
     case actions.VIDEO_INFO_RECIEVED:
       return {
         ...state,
+        email: action.email,
         ws: action.ws,
         channel: action.channel,
         id: action.id,

@@ -5,9 +5,9 @@
   "main": "catcamd.js",
   "scripts": {
     "debug": "node --inspect-brk catcamd.js",
-    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.config.js --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='prod' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='prod' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "parse": "eslint ."
   },
   "keywords": [
@@ -28,6 +28,7 @@
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "react-hot-loader": "^3.0.0-beta.7",
     "react-intl": "^2.3.0",
     "react-redux": "^5.0.4",
     "react-router": "^4.1.1",
@@ -53,7 +54,6 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
-    "babel-preset-react-hmre": "^1.1.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-runtime": "^6.23.0",
     "css-loader": "^0.28.0",

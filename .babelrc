@@ -2,7 +2,8 @@
   "plugins": [
     "transform-class-properties",
     "syntax-decorators",
-    "transform-decorators-legacy"
+    "transform-decorators-legacy",
+    "react-hot-loader/babel"
   ],
   "presets": [
     ["es2015", {
@@ -10,12 +11,5 @@
     }],
     "react",
     "stage-0"
-  ],
-  "env": {
-    "development": {
-      "presets": [
-        "react-hmre"
-      ]
-    }
-  }
+  ]
 }

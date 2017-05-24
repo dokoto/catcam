@@ -2,7 +2,7 @@ const spawn = require('child_process').spawn;
 const os = require('os');
 const FFMPEG = require('./responses/GET/ffmpeg');
 const LABEL = 'VIDEO-DISPACHER';
-const RECONNECTION_MS = 2000;
+const RECONNECTION_MS = 3000;
 
 module.exports = class VideoDispacher {
   constructor(options) {
@@ -20,11 +20,8 @@ module.exports = class VideoDispacher {
   }
 
   _onConnection(sockConn) {
-    console.log(
-      `New WebSocket Connection:
-      ${ sockConn.conn.remoteAddress }
-      ${ sockConn.client.request.headers["user-agent"] }`
-    );
+    console.log(`[${ LABEL }][CONNECTED] ${ sockConn.conn.remoteAddress }`);
+    console.log(sockConn.client.request.headers["user-agent"]);
     sockConn.on('close', this._onClose.bind(this, sockConn));
     sockConn.on('join', this._onJoin.bind(this, sockConn));
     sockConn.on('start', this._onStart.bind(this, sockConn));
@@ -35,51 +32,61 @@ module.exports = class VideoDispacher {
     console.log('Disconnected WebSocket %s %s', code, message);
   }
 
-  _onJoin(sockConn, room) {
-    if (room !== this.channel) {
-      console.error(`[${ LABEL }][JOIN] Error access ${ room } !== ${ this.channel }`);
+  _onJoin(sockConn, options) {
+    if (options.channel !== this.channel) {
+      console.error(`[${ LABEL }][JOIN] Error ${ options.email } accessing ${ options.channel } !== ${ this.channel }`);
       return;
     }
-    console.log(`[${ LABEL }][JOIN] Joining to channel ${ this.channel }`);
-    sockConn.join(room);
-    this.ws.to(this.channel).emit('joined');
+    console.log(`[${ LABEL }][JOIN] ${ options.email } joining to channel ${ this.channel }`);
+    sockConn.join(options.channel);
+
+    if (this.childProcess) {
+      console.log(`[${ LABEL }] FFMPEG killing pid ${ this.childProcess.pid }`);
+      this.ws.to(this.channel).emit('new:user');
+      this.childProcess.kill('SIGKILL');
+      setTimeout(() => {
+        console.log(`[${ LABEL }] FFMPEG pid ${ this.childProcess.pid } killed`);
+        this.ws.to(this.channel).emit('joined');
+        this.ws.to(this.channel).emit('camera:down');
+        this.childProcess = null;
+      }, RECONNECTION_MS);
+    } else {
+      this.ws.to(this.channel).emit('joined');
+      this.ws.to(this.channel).emit('camera:down');
+    }
   }
 
   _onStart(sockConn, options) {
     if (options.channel !== this.channel) {
-      console.error(`[${ LABEL }][START] Error access ${ options.channel } !== ${ this.channel }`);
+      console.error(`[${ LABEL }][START] Error ${ options.email } accessing ${ options.channel } !== ${ this.channel }`);
       return;
     }
 
-    if (this.childProcess && !this.connecting) {
-      this.connecting = true;
-      this.ws.to(this.channel).emit('reconnecting');
-      console.log(`[${ LABEL }] FFMPEG killing pid ${ this.childProcess.pid }`);
-      this.childProcess.kill('SIGKILL');
-      setTimeout(() => {
-        console.log('Process endded, new process..');
-        console.log(`[${ LABEL }][RE-CONNECT] ffmpeg ${ this.ffmpegCmd.join(' ') }`);
-        this.childProcess = spawn('ffmpeg', this.ffmpegCmd);
-        console.log(`[${ LABEL }] FFMPEG PID ${ this.childProcess.pid }`);
-        this.ws.to(this.channel).emit('restarted');
-        this.connecting = false;
-      }, RECONNECTION_MS);
-    } else if (!this.childProcess && !this.connecting) {
-      console.log(options);
-      this.ffmpegCmd.splice(this.ffmpegCmd.indexOf('-video_size')+1, 0, options.resolution);
+    if (!this.childProcess) {
+      console.log(`[${ LABEL }][START] ${ options.email } starting live cam`);
+      this.ffmpegCmd.splice(this.ffmpegCmd.indexOf('-video_size') + 1, 0, options.resolution);
       this.ffmpegCmd.push(`http://${ this.web_ip }:${ this.web_port }`);
-      console.log(`[${ LABEL }][CONNECT] ffmpeg ${ this.ffmpegCmd.join(' ') }`);
+      console.log(`[${ LABEL }][START] ffmpeg ${ this.ffmpegCmd.join(' ') }`);
       this.childProcess = spawn('ffmpeg', this.ffmpegCmd);
+      this.ffmpegCmd.splice(this.ffmpegCmd.indexOf('-video_size') + 1, 1);
+      this.ffmpegCmd.splice(this.ffmpegCmd.length - 1);
       console.log(`[${ LABEL }] FFMPEG PID: ${ this.childProcess.pid }`);
       this.ws.to(this.channel).emit('started');
     }
   }
 
   _onDisconnect(sockConn) {
-    console.log('Client disconected');
-    console.log(`[${ LABEL }] FFMPEG killing pid ${ this.childProcess.pid }`);
-    this.childProcess.kill('SIGKILL');
-    this.ws.to(this.channel).emit('disconnect');
+    console.log(`[${ LABEL }][DISCONNECT] Client disconnected`);
+    if (this.childProcess) {
+      this.ws.to(this.channel).emit('disconnected');
+      const pid = this.childProcess.pid;
+      this.childProcess.kill('SIGKILL');
+      setTimeout(() => {
+        console.log(`[${ LABEL }] FFMPEG pid ${ pid } killed`);
+        this.ws.to(this.channel).emit('camera:down');
+        this.childProcess = null;
+      }, RECONNECTION_MS);
+    }
     sockConn.leave(this.channel);
   }
 }

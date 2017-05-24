@@ -1,5 +1,14 @@
 import * as actions from './actions';
 
+export function initLiveStreaming(tagName, ws) {
+  return {
+    type: actions.INIT_LIVE_STREAMING,
+    tagName,
+    ws,
+  };
+}
+
+
 export function requestVideoBufferConnection(tagName) {
   return {
     type: actions.VIDEO_BUFFER_CONNECT,
@@ -32,16 +41,18 @@ export function requestSocketDisconection() {
   };
 }
 
-export function requestSocketJoin(channel) {
+export function requestSocketJoin(email, channel) {
   return {
     type: actions.SOCKET_JOIN,
+    email,
     channel,
   };
 }
 
-export function requestSocketStartStream(channel, resolution) {
+export function requestSocketStartStream(email, channel, resolution) {
   return {
     type: actions.SOCKET_START_STREAM,
+    email,
     channel,
     resolution,
   };
