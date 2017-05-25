@@ -6,17 +6,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const ifs = require('os').networkInterfaces();
+let Conf = require('../.appconf.json');
 
 const jsSourcePath = path.join(__dirname, '../app/src');
 const buildPath = path.join(__dirname, '../build');
 const imgPath = path.join(__dirname, '../app/assets/img');
 const fontsPath = path.join(__dirname, '../app/assets/fonts');
 const sourcePath = path.join(__dirname, '../app');
-const HTTP_PORT = 8002;
-const LOCAL_IP = Object.keys(ifs)
+Conf.ENV.loc = Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
   .filter(z => z)[0].address;
-const TEST_REST_API = `'http://${ LOCAL_IP }:${ HTTP_PORT }'`;
 
 function normalizeEnvVars(env_vars) {
   console.log('ENVIRONMENT VARS %s', JSON.stringify(env_vars));
@@ -29,7 +28,22 @@ function normalizeEnvVars(env_vars) {
 module.exports = env => {
   normalizeEnvVars(env);
   const isProduction = env.target === 'prod';
-  console.log(`Compiling for ${ env.target === 'dev' ? JSON.stringify("development") : JSON.stringify("production") }`);
+  console.log(
+    `Compiling for ${ env.target === 'dev' ? JSON.stringify('development') : JSON.stringify('production') }`
+  );
+  let REST_API;
+
+  switch (env.env) {
+    case 'loc':
+      REST_API = `'http://${ Conf.ENV.loc }:${ Conf.HTTP_RESTFUL_PORT }'`;
+      break;
+    case 'dev':
+      REST_API = `'http://${ Conf.ENV.dev }:${ Conf.HTTP_RESTFUL_PORT }'`;
+      break;
+    case 'prod':
+      REST_API = `'http://${ Conf.ENV.prod }:${ Conf.HTTP_RESTFUL_PORT }'`;
+      break;
+  }
 
   // Common plugins
   const plugins = [
@@ -61,11 +75,13 @@ module.exports = env => {
       TARGET: JSON.stringify(env.target),
       PLATFORM: JSON.stringify(env.platform),
       VERSION: JSON.stringify(env.version),
-      REST_API: env.env === 'dev' ? TEST_REST_API : "'https://proxyserver.homelinux.net:8001'",
+      REST_API: REST_API,
       LANGUAJE: JSON.stringify(env.languaje),
-      "process.env": {
-        NODE_ENV: env.target === 'dev' ? JSON.stringify("development") : JSON.stringify("production")
-      }
+      'process.env': {
+        NODE_ENV: env.target === 'dev'
+          ? JSON.stringify('development')
+          : JSON.stringify('production'),
+      },
     }),
   ];
 
@@ -90,9 +106,7 @@ module.exports = env => {
 
   let entries = [];
   if (isProduction) {
-    entries = [
-      'app.js'
-    ];
+    entries = ['app.js'];
     // Production plugins
     plugins.push(
       new webpack.LoaderOptionsPlugin({
@@ -130,10 +144,14 @@ module.exports = env => {
       'react-hot-loader/patch',
       'webpack-dev-server/client?http://localhost:3000',
       'webpack/hot/only-dev-server',
-      'app.js'
+      'app.js',
     ];
     // Development plugins
-    plugins.push(new webpack.HotModuleReplacementPlugin(), new webpack.NamedModulesPlugin(), new DashboardPlugin());
+    plugins.push(
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NamedModulesPlugin(),
+      new DashboardPlugin()
+    );
 
     // Development rules
     rules.push({

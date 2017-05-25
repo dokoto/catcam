@@ -1,13 +1,10 @@
 
 const Camera = require ('./camera');
 const LocalWebServer = require('./localWebServer');
-const Services = require('./Services');
+const Services = require('./services');
 const VideoDispacher = require('./videoDispacher');
 const Utils = require('./utils');
-
-const WEBSOCKET_STREAM_PORT = 4445;
-const LOCALONLY_HTTP_STREAM_PORT = 8001;
-const HTTP_RESTFUL_PORT = 8002;
+const Conf = require('../../.appconf.json');
 
 class CamCat {
   constructor(options) {
@@ -33,4 +30,4 @@ class CamCat {
 
 }
 
-new CamCat([WEBSOCKET_STREAM_PORT, LOCALONLY_HTTP_STREAM_PORT, HTTP_RESTFUL_PORT]);
+new CamCat([Conf.WEBSOCKET_STREAM_PORT, Conf.LOCALONLY_HTTP_STREAM_PORT, Conf.HTTP_RESTFUL_PORT]);

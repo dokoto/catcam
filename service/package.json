@@ -1,0 +1,26 @@
+{
+  "name": "catcam",
+  "version": "0.0.1",
+  "description": "mock rest api",
+  "main": "catcamd.js",
+  "scripts": {
+    "test": "node --inspect-brk server.js"
+  },
+  "keywords": [
+    "webcam"
+  ],
+  "author": "dokoto.moloko@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "biguint-format": "^1.0.0",
+    "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.6",
+    "express": "^4.15.2",
+    "socket.io": "^1.7.3",
+    "method-override": "^2.3.8"
+  },
+  "devDependencies": {
+    "nopt": "^4.0.1"
+  }
+}

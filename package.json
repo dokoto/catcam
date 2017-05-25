@@ -5,9 +5,11 @@
   "main": "catcamd.js",
   "scripts": {
     "debug": "node --inspect-brk catcamd.js",
-    "test": "node node_modules/webpack/bin/webpack.js --config scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "test-dash": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "build-web": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='prod' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test-loc": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.env='loc' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "test-dev": "node node_modules/webpack-dashboard/bin/webpack-dashboard.js -t 'CatCam' -- node node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./scripts/webpack.config.js --colors --no-info  --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "build-web-loc": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='loc' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "build-web-dev": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
+    "build-web-prod": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='prod' --env.env='prod' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "parse": "eslint ."
   },
   "keywords": [

@@ -1,0 +1,10 @@
+{
+  "WEBSOCKET_STREAM_PORT": 4445,
+  "LOCALONLY_HTTP_STREAM_PORT": 8001,
+  "HTTP_RESTFUL_PORT": 8002,
+  "ENV": {
+    "loc": "",
+    "dev": "192.168.77.4",
+    "prod": "https://proxyserver.homelinux.net"
+  }
+}
