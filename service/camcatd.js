@@ -6,6 +6,8 @@ const Utils = require('./utils');
 const Conf = require('../.appconf.json');
 const Options = require('./options');
 
+const LABEL = 'CATCAMD';
+
 class CamCat {
   constructor(options) {
     [this.webSocketStreamPort, this.localOnlyHttpStreamPort, this.httpRestfulPort] = options;
@@ -16,6 +18,7 @@ class CamCat {
   }
 
   settings(resolutions) {
+    console.log(`[${ LABEL }] Allowed resolutions ${ JSON.stringify(resolutions) }`);
     this.services = new Services([
       Utils.localIp(),
       this.httpRestfulPort,

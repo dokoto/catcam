@@ -4,7 +4,7 @@ const os = require('os');
 module.exports = class Camera {
   constructor() {
     this.ffmpeg = {
-      linux: ['-f', 'dshow', '-list_options', 'true', '-i', '/dev/video0'],
+      linux: ['-f', 'v4l2', '-list_formats', 'all', '-i', '/dev/video0'],
       win: ['-f', 'dshow', '-list_options', 'true', '-i', 'video=Integrated Camera'],
     };
     this.resolutionsArr = [];
@@ -14,20 +14,22 @@ module.exports = class Camera {
     return new Promise(this.requestResolutions.bind(this));
   }
 
-  requestResolutions(resolve, reject) {
+  requestResolutions(resolve) {
     const cmd = os.platform() === 'win32' ? this.ffmpeg.win : this.ffmpeg.linux;
     const childProcess = spawn('ffmpeg', cmd);
     childProcess.stdout.on('data', this.extractResolutions.bind(this));
     childProcess.stderr.on('data', this.extractResolutions.bind(this));
-    childProcess.on('close', code => {
-      const resolutionSet = new Set(this.resolutionsArr);
-      resolve(this.sortResolutions([...resolutionSet]));
-    });
+    childProcess.on('close', this.onProcessClose.bind(this, resolve));
+  }
+
+  onProcessClose(resolve) {
+    const resolutionSet = new Set(this.resolutionsArr);
+    resolve(this.sortResolutions([...resolutionSet]));
   }
 
   sortResolutions(resolutionsArray) {
-    let obj = {};
-    for (let i in resolutionsArray) {
+    const obj = {};
+    for (let i = 0; i < resolutionsArray.length; i++) {
       const [w, h] = resolutionsArray[i].split('x');
       const pos = Number(w) + Number(h);
       obj[pos] = resolutionsArray[i];
@@ -38,6 +40,7 @@ module.exports = class Camera {
   extractResolutions(uint8Data) {
     if (uint8Data) {
       const stringData = String.fromCharCode.apply(null, uint8Data);
+      // console.log(stringData);
       const matched = stringData.match(/\d{3,4}x\d{3,4}/g);
       if (matched) {
         this.resolutionsArr = this.resolutionsArr.concat(matched);
@@ -45,8 +48,3 @@ module.exports = class Camera {
     }
   }
 };
-
-/*
-const c = new Camera();
-c.resolutions().then(res => console.log(res));
-*/
