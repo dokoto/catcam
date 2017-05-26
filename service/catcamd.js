@@ -15,10 +15,12 @@ class CamCat {
     this.camResolutions = [];
     this.channel = Utils.generateRandHash();
     this.options = Options.get();
+    console.log(`[${ LABEL }] Options: ${ JSON.stringify(this.options) }`);
   }
 
   settings(resolutions) {
     console.log(`[${ LABEL }] Allowed resolutions ${ JSON.stringify(resolutions) }`);
+
     this.services = new Services([
       Utils.localIp(),
       this.httpRestfulPort,
@@ -26,7 +28,13 @@ class CamCat {
       this.webSocketStreamPort,
       resolutions,
       this.channel,
+      `mongodb://${ Conf.LOCALONLY_MONGO_DB_IP }:${ Conf.LOCALONLY_MONGO_DB_PORT }/${ Conf.MONGO_DB_NAME }`,
+      Conf.GOOGLE_CLIENT_ID,
+      Conf.GOOGLE_CLIENT_SECRET,
+      Conf.GOOGLE_AUTH2_CALLBACK,
+      this.options,
     ]);
+
     this.videoDispacher = new VideoDispacher([
       Utils.localIp(),
       this.webSocketStreamPort,
@@ -34,11 +42,13 @@ class CamCat {
       this.localOnlyHttpStreamPort,
       this.channel,
     ]);
+
     this.localWebServer = new LocalWebServer([
       Utils.localIp(),
       this.localOnlyHttpStreamPort,
       this.channel,
       this.videoDispacher.ws,
+      resolutions,
     ]);
     this.setListener();
   }

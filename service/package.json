@@ -4,7 +4,8 @@
   "description": "mock rest api",
   "main": "catcamd.js",
   "scripts": {
-    "test": "node --inspect-brk server.js"
+    "test": "node --inspect-brk camcatd.js",
+    "start": "node camcatd.js"
   },
   "keywords": [
     "webcam"

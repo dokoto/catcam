@@ -2,6 +2,12 @@
   "WEBSOCKET_STREAM_PORT": 4445,
   "LOCALONLY_HTTP_STREAM_PORT": 8001,
   "HTTP_RESTFUL_PORT": 8002,
+  "LOCALONLY_MONGO_DB_PORT": 27017,
+  "LOCALONLY_MONGO_DB_IP": "127.0.0.1",
+  "MONGO_DB_NAME": "Catcam",
+  "GOOGLE_CLIENT_ID": "702802836349-cmpihi89o5pp2mh85cl8t06g2k9jmjuu.apps.googleusercontent.com",
+  "GOOGLE_CLIENT_SECRET": "7v7XQ2fl-PfvMBSwGrfdMqDP",
+  "GOOGLE_AUTH2_CALLBACK": "http://proxyserver.homelinux.net/catcam/auth/google/callback",
   "ENV": {
     "loc": "",
     "dev": "192.168.77.4",
