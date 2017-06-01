@@ -1,5 +1,5 @@
 const Params = require('./params');
-const TaskMaker = require('./taskmaker');
+const Tasks = require('./tasks');
 const Executer = require('./executer');
 
 
@@ -10,6 +10,6 @@ if (parsedParams.options.help) {
   process.exit(-1);
 }
 
-const taskMaker = new TaskMaker(parsedParams.options);
-const tasks = taskMaker.build();
-Executer.run(tasks);
+
+const executer = new Executer(Tasks(parsedParams.options));
+executer.run(`build-${ parsedParams.options.platform }-${ parsedParams.options.target }`);

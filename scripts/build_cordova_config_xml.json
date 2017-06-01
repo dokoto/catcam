@@ -1,0 +1,106 @@
+{
+    "toModify": [{
+        "nodeName": "widget",
+        "nodeFather": "widget",
+        "attributes": [{
+            "key": "version",
+            "value": {
+                "nodeLibs": [],
+                "code": "return options.pkg.version;"
+            }
+        }]
+    }, {
+        "nodeName": "name",
+        "nodeFather": "widget",
+        "value": {
+            "nodeLibs": [],
+            "code": "return options.pkg.name;"
+        }
+    }, {
+        "nodeName": "description",
+        "nodeFather": "widget",
+        "value": {
+            "nodeLibs": [],
+            "code": "return options.pkg.description;"
+        }
+    }, {
+        "nodeName": "author",
+        "nodeFather": "widget",
+        "value": "manuel.alfaro.sierra@gmail.com",
+        "attributes": [{
+            "key": "email",
+            "value": {
+                "nodeLibs": [],
+                "code": "return options.pkg.author;"
+            }
+        }, {
+            "key": "href",
+            "value": {
+                "nodeLibs": [],
+                "code": "return options.pkg.homepage;"
+            }
+        }]
+    }],
+    "toCreate": [{
+        "nodeName": "preference",
+        "nodeFather": {
+            "tag": "platform",
+            "attributes": [{
+                "key": "name",
+                "value": "android"
+            }]
+        },
+        "attributes": [{
+            "key": "name",
+            "value": "android-minSdkVersion"
+        }, {
+            "key": "value",
+            "value": "19"
+        }]
+    }, {
+        "nodeName": "preference",
+        "nodeFather": {
+            "tag": "platform",
+            "attributes": [{
+                "key": "name",
+                "value": "android"
+            }]
+        },
+        "attributes": [{
+            "key": "name",
+            "value": "android-targetSdkVersion"
+        }, {
+            "key": "value",
+            "value": "25"
+        }]
+    }, {
+        "nodeName": "preference",
+        "nodeFather": {
+            "tag": "platform",
+            "attributes": [{
+                "key": "name",
+                "value": "android"
+            }]
+        },
+        "attributes": [{
+            "key": "name",
+            "value": "Orientation"
+        }, {
+            "key": "value",
+            "value": "portrait"
+        }]
+    },{
+        "nodeName": "allow-intent",
+        "nodeFather": {
+            "tag": "widget",
+            "attributes": [{
+                "key": "id",
+                "value": "org.manuel.cvassitant"
+            }]
+        },
+        "attributes": [{
+            "key": "href",
+            "value": "tg:*"
+        }]
+    }]
+}
