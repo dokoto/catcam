@@ -1,47 +1,41 @@
-const nopt = require('nopt');
-const noptUsage = require("nopt-usage");
+module.exports = require('yargs')
+  .usage('Usage: $0 [options]')
+  // PLATFORM OPTION
+  .array('platform')
+  .describe('platform', 'Tipo de release')
+  .choices('platform', ['web', 'native'])
+  .alias('p', 'platform')
+  .demandOption(['platform'])
+  // TARGET OPTION
+  .array('target')
+  .describe('target', 'Tipo de release a generar')
+  .choices('target', ['dev', 'prod'])
+  .alias('t', 'target')
+  .demandOption(['target'])
+  // ENV OPTION
+  .array('env')
+  .describe('env', 'Entorno donde se encuentran los servicios')
+  .choices('env', ['loc', 'dev', 'prod'])
+  .alias('e', 'env')
+  .demandOption(['env'])
+  // OS OPTION
+  .array('os')
+  .describe('os', 'Sistema operativo movil a compilar')
+  .choices('os', ['android', 'ios'])
+  .alias('o', 'os')
+  .default('os', 'android')
+  // LANGUAJE OPTION
+  .array('lang')
+  .describe('lang', 'Idioma de la app')
+  .choices('lang', ['EN', 'ES'])
+  .alias('l', 'lang')
+  .demandOption(['lang'])
+  // LANGUAJE OPTION
+  .describe('version', 'Version de la app a generar')
+  .alias('v', 'version')
+  .demandOption(['version'])
+  // HELP
+  .help('h')
+  .alias('h', 'help').argv;
 
-const knownOpts = {
-  target: ['dev', 'prod'],
-  env: ['loc', 'dev', 'prod'],
-  platform: ['web', 'native'],
-  version: String,
-  languaje: ['EN'],
-  help: Boolean,
-};
-
-const shortHands = {
-  t: ['--target'],
-  e: ['--env'],
-  p: ['--platform'],
-  v: ['--version'],
-  l: ['--languaje'],
-  h: ['--help']
-};
-
-const description = {
-  target: 'Tipo de release a generar',
-  env: 'Entorno donde se encuentran los servicios',
-  platform: 'Plataforma a la que va destinada la release',
-  version: 'Version de la app a generar',
-  languaje: 'Idioma de la app',
-  help: 'Muestra esta ayuda',
-};
-
-const defaults = {
-  target: 'dev',
-  env: 'loc',
-  platform: 'web',
-  version: '999.999.1',
-  languaje: 'EN',
-  help: true,
-};
-
-module.exports = class Params {
-  static get() {
-    return {
-      options: nopt(knownOpts, shortHands, process.argv, 2),
-      usage: noptUsage(knownOpts, shortHands, description, defaults)
-    };
-  }
-};
+// console.log(JSON.stringify(argv));

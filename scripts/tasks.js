@@ -1,9 +1,10 @@
 module.exports = function (options) {
+  // console.log(JSON.stringify(options, null, '\t'));
   return {
     webpack: {
       description: 'Webpack: packing...',
       tasks: [
-        `node ${ options.webpack.bin } --config ${ options.webpack.config } --progress --profile --colors --env.target='${ options.params.target }' --env.env='${ options.params.env }' --env.platform='${ options.params.platform }' --env.version='${ options.params.version }' --env.languaje='${ options.params.languaje }'`,
+        `node ${ options.webpack.bin } --config ${ options.webpack.config } --progress --profile --colors --env.target='${ options.params.target }' --env.env='${ options.params.env }' --env.platform='${ options.params.platform }' --env.os='${ options.params.os }' --env.version='${ options.params.version }' --env.lang='${ options.params.lang }'`,
       ],
     },
     'copy-sources': {
@@ -23,11 +24,11 @@ module.exports = function (options) {
     'cordova-create': {
       description: 'Apache Cordova creating project...',
       tasks: [
-        `cordova create ${ options.cordova.folderName || 'hello' } ${ options.cordova.domain || 'com.sample.hello' } ${ options.cordova.winTitle || 'HelloWorld' }`,
+        `${ options.cordova.bin } create ${ options.cordova.folderName || 'hello' } ${ options.cordova.domain || 'com.sample.hello' } ${ options.cordova.winTitle || 'HelloWorld' }`,
         () => {
-          return typeof options.params.platforms === 'string'
-            ? `codrova platform add ${ options.params.platforms }`
-            : options.params.platforms.map(item => `codrova platform add ${ item }`);
+          return typeof options.params.os === 'string'
+            ? `${ options.cordova.bin } platform add ${ options.params.os }`
+            : options.params.os.map(item => `${ options.cordova.bin } platform add ${ item }`);
         },
       ],
     },
@@ -37,8 +38,8 @@ module.exports = function (options) {
         () => {
           if (!options.cordova.plugins) return null;
           return typeof options.cordova.plugins === 'string'
-            ? `codrova plugins add ${ options.cordova.plugins }`
-            : options.cordova.plugins.map(item => `codrova plugins add ${ item }`);
+            ? `${ options.cordova.bin } plugins add ${ options.cordova.plugins }`
+            : options.cordova.plugins.map(item => `${ options.cordova.bin } plugins add ${ item }`);
         },
       ],
     },
@@ -69,8 +70,8 @@ module.exports = function (options) {
       tasks: [
         () => {
           return typeof options.cordova.platforms === 'string'
-            ? `cordova build ${ options.cordova.platforms }`
-            : options.cordova.platforms.map(item => `cordova build ${ item }`);
+            ? `${ options.cordova.bin } build ${ options.cordova.platforms }`
+            : options.cordova.platforms.map(item => `${ options.cordova.bin } build ${ item }`);
         },
       ],
     },

@@ -1,18 +1,24 @@
+const path = require('path');
 const Params = require('./params');
 const Tasks = require('./tasks');
 const Executer = require('./executer');
 
-const parsedParams = Params.get();
-console.log(JSON.stringify(parsedParams));
-if (parsedParams.options.help) {
-  console.log('Usage:');
-  console.log(parsedParams.usage);
-  process.exit(-1);
-}
-
 const executer = new Executer(
   Tasks({
-    params: parsedParams.options,
+    baseDir: process.cwd(),
+    params: Params,
+    webpack: {
+      bin: path.join(process.cwd(), 'node_modules/webpack/bin/webpack.js'),
+      config: path.join(__dirname, 'webpack.config.js'),
+    },
+    cordova: {
+      bin: path.join(process.cwd(), 'node_modules/cordova/bin/cordova'),
+      folderName: 'catcam',
+      domain: 'net.catcam',
+      winTitle: 'Catcam',
+      plugins: [],
+    },
   })
 );
-executer.run(`build-${ parsedParams.options.platform }-${ parsedParams.options.target }`);
+
+executer.run(`build-${ Params.platform }-${ Params.env }`);

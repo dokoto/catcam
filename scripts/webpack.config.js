@@ -76,7 +76,7 @@ module.exports = env => {
       PLATFORM: JSON.stringify(env.platform),
       VERSION: JSON.stringify(env.version),
       REST_API: REST_API,
-      LANGUAJE: JSON.stringify(env.languaje),
+      LANGUAJE: JSON.stringify(env.lang),
       'process.env': {
         NODE_ENV: env.target === 'dev'
           ? JSON.stringify('development')

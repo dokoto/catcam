@@ -1,4 +1,8 @@
 const exec = require('child_process').exec;
+const spawn = require('child_process').spawn;
+
+const LABEL = '[EXECUTER]';
+require('colors');
 
 module.exports = class Executer {
   constructor(tasks) {
@@ -16,12 +20,34 @@ module.exports = class Executer {
     }
   }
 
-  execCommand(command) {
+  execCommand2(command) {
     return new Promise((accept, reject) => {
-      exec(command, (err, stdout, stderr) => {
-        if (err) reject(err);
-        accept(stdout, stderr);
+      exec(command, err => {
+        if (err) {
+          console.error(`${ LABEL } ${ err }`.red);
+          console.error(`${ LABEL } ${ command }`.red);
+          reject(err);
+        }
+        accept();
       });
+    });
+  }
+
+  execCommand(command) {
+    return new Promise((accept) => {
+      const cmd = command.split(' ')[0];
+      const argv = command.split(' ').splice(1);
+      const proc = spawn(cmd, argv);
+      proc.on('close', code => accept(code));
+
+      proc.stdout.on('data', data => {
+        console.log(`stdout: ${ data }`);
+      });
+
+      proc.stderr.on('data', data => {
+        console.log(`stderr: ${ data }`);
+      });
+
     });
   }
 
@@ -54,10 +80,14 @@ module.exports = class Executer {
   }
 
   tasker(taskName, index = 0) {
+    if (!Object.prototype.hasOwnProperty.call(this.tasks, taskName)) {
+      console.error(`${ LABEL } Task ${ taskName } not found`.red);
+      process.exit(-1);
+    }
     const tasks = this.tasks[taskName].tasks;
     if (tasks.length === index) return null;
 
-    console.log(this.tasks[taskName].description);
+    console.log(`${ LABEL } ${ this.tasks[taskName].description }`.blue);
     const taskType = this.taskIs(tasks[index]);
     switch (taskType) {
       case 'import': {
