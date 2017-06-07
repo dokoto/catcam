@@ -32,8 +32,12 @@ module.exports = require('yargs')
   .demandOption(['lang'])
   // LANGUAJE OPTION
   .describe('version', 'Version de la app a generar')
-  .alias('v', 'version')
+  .alias('vers', 'version')
   .demandOption(['version'])
+  // VERBOSE
+  .count('verbose')
+  .alias('v', 'verbose')
+  .describe('verbose', 'Log ampliado')
   // HELP
   .help('h')
   .alias('h', 'help').argv;

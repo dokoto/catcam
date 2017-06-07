@@ -3,6 +3,9 @@ const Params = require('./params');
 const Tasks = require('./tasks');
 const Executer = require('./executer');
 
+const debuglog = level => (msg, ...argv) => level && console.log.apply(this, [msg, ...argv]);
+console.debug = debuglog(Params.verbose);
+
 const executer = new Executer(
   Tasks({
     baseDir: process.cwd(),
@@ -19,6 +22,6 @@ const executer = new Executer(
       plugins: [],
     },
   })
-);
+, Params);
 
 executer.run(`build-${ Params.platform }-${ Params.env }`);
