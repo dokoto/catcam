@@ -9,9 +9,9 @@ const ifs = require('os').networkInterfaces();
 let Conf = require('../.appconf.json');
 
 const jsSourcePath = path.join(__dirname, '../app/src');
-const buildPath = path.join(__dirname, '../build');
 const imgPath = path.join(__dirname, '../app/assets/img');
 const fontsPath = path.join(__dirname, '../app/assets/fonts');
+const buildPath = path.join(__dirname, '../build/web');
 const sourcePath = path.join(__dirname, '../app');
 Conf.ENV.loc = Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
@@ -168,7 +168,7 @@ module.exports = env => {
     output: {
       path: buildPath,
       publicPath: isProduction ? './' : '/',
-      filename: 'app-[hash].js',
+      filename: 'app.js',
     },
     module: {
       rules,

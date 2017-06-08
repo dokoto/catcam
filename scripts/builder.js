@@ -19,9 +19,15 @@ const executer = new Executer(
       folderName: 'catcam',
       domain: 'net.catcam',
       winTitle: 'Catcam',
+      buildPath: path.join(process.cwd(), 'build/native'),
       plugins: [],
     },
-  })
-, Params);
+    sources: {
+      source: path.join(process.cwd(), `build/web`),
+      dest: path.join(process.cwd(), `build/native/platforms/${ Params.os }/www`),
+    },
+  }),
+  Params
+);
 
 executer.run(`build-${ Params.platform }-${ Params.env }`);
