@@ -23,8 +23,8 @@ const executer = new Executer(
       plugins: [],
     },
     sources: {
-      source: path.join(process.cwd(), `build/web`),
-      dest: path.join(process.cwd(), `build/native/platforms/${ Params.os }/www`),
+      source: path.join(process.cwd(), 'build/web'),
+      dest: `platforms/${ Params.os }/www`,
     },
   }),
   Params

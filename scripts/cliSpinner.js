@@ -24,6 +24,9 @@ module.exports = class Spinner {
   stop() {
     if (this.interval) clearInterval(this.interval);
     this.interval = null;
-    if (this.msg) console.log(this.msg);
+    if (this.msg) {
+      logUpdate.clear();
+      console.log(this.msg);
+    }
   }
 }

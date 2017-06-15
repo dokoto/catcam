@@ -10,7 +10,7 @@
     "build-web-loc": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='loc' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "build-web-dev": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='dev' --env.env='dev' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
     "build-web-prod": "node node_modules/webpack/bin/webpack.js --config ./scripts/webpack.config.js --progress --profile --colors --env.target='prod' --env.env='prod' --env.platform='web' --env.version='0.0.1' --env.languaje='EN'",
-    "build-native-loc": "node scripts/builder.js -p native -t dev -e loc -o android -l EN -v 999.test",
+    "build-native-loc": "node scripts/builder.js -p native -t prod -e loc -o android -l EN --vers 999.test",
     "parse": "eslint ."
   },
   "keywords": [
@@ -81,6 +81,7 @@
     "react-addons-test-utils": "^15.5.1",
     "redux-logger": "^3.0.1",
     "sass-loader": "^6.0.3",
+    "shelljs": "^0.7.8",
     "stats-webpack-plugin": "^0.6.0",
     "style-loader": "^0.16.1",
     "url-loader": "^0.5.8",

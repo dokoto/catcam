@@ -1,4 +1,7 @@
-var argv = require('yargs')
-    .usage('Usage: $0 -w [num] -h [num]')
-    .demandOption(['w','h'])
-    .argv;
+const sh = require('shelljs');
+const path = require('path');
+
+const pp = path.join(process.cwd(), 'build');
+console.log(pp);
+sh.exec('cd ' + pp);
+sh.exec('ls -l');
