@@ -12,19 +12,6 @@ module.exports = class Executer {
     this.dotSpinner = new cliSpinner('dots');
   }
 
-  taskIs(task) {
-    switch (typeof task) {
-      case 'string':
-        return task[0] === '@' ? 'import' : 'string';
-      case 'function':
-        return typeof task;
-      case 'object':
-        return Array.isArray(task) ? 'array' : 'object';
-      default:
-        return null;
-    }
-  }
-
   execCommand(command) {
     console.debug(`${ LABEL } Execute ${ command }`);
     return new Promise((accept, reject) => {
@@ -103,7 +90,8 @@ module.exports = class Executer {
       );
     }
     /* eslint-disable global-require,import/no-dynamic-require*/
-    const deps = params && params[1].split(',').map(item => deps.push(require(item)));
+    const deps = [];
+    if (params ) params[1].split(',').map(item => deps.push(require(item)));
     /* eslint-enable global-require*/
     return func(...deps);
   }
@@ -124,19 +112,19 @@ module.exports = class Executer {
       console.log(`${ LABEL } ${ taskToExec.description }`.blue);
     }
 
-    switch (taskToExec.taskType) {
-      case 'string':
-        this.execCommand(taskToExec.task)
+    switch (taskToExec.type) {
+      case 'SPAWN_COMMAND':
+        this.execCommand(taskToExec.action)
           .then(this.processTaskPool.bind(this, tasksToExec))
           .catch(this.handleCmdError.bind(this));
         break;
-      case 'array':
-        this.shelljs(taskToExec.task)
+      case 'SHELLJS_COMMAND':
+        this.shelljs(taskToExec.action)
           .then(this.processTaskPool.bind(this, tasksToExec))
           .catch(this.handleCmdError.bind(this));
         break;
-      case 'function':
-        this.execFunction(taskToExec.task)
+      case 'FUNTION_PROMISE':
+        this.execFunction(taskToExec.action)
           .then(this.processTaskPool.bind(this, tasksToExec))
           .catch(this.handleCmdError.bind(this));
         break;
@@ -151,21 +139,24 @@ module.exports = class Executer {
 
   tasker(description, tasks, cmds = []) {
     const task = tasks.shift();
-    const taskType = this.taskIs(task);
 
-    if (taskType === 'import') {
-      this.tasker(this.tasks[task.slice(1)].description, this.tasks[task.slice(1)].tasks, cmds);
-    } else if (taskType === 'string' || taskType === 'array') {
-      cmds.push({ description, taskType, task });
-    } else if (taskType === 'function') {
-      const funcResult = task();
+    if (task.type === 'IMPORT') {
+      this.tasker(this.tasks[task.action].description, this.tasks[task.action].tasks, cmds);
+    } else if (task.type === 'SPAWN_COMMAND') {
+      cmds.push({ description, type: task.type, action: task.action });
+    } else if (task.type === 'SHELLJS_COMMAND') {
+      cmds.push({ description, type: task.type, action: task.action });
+    } else if (task.type === 'SPAWN_ARRAY_COMMAND') {
+      const funcResult = task.action();
       if (Array.isArray(funcResult)) {
-        funcResult.map(item => cmds.push({ description, taskType, task: item }));
+        funcResult.map(item => cmds.push({ description, type: 'SPAWN_COMMAND', action: item }));
       } else if (typeof funcResult === 'string') {
-        cmds.push({ description, taskType, task: funcResult });
+        cmds.push({ description, type: 'SPAWN_COMMAND', action: funcResult });
       } else {
         console.error(`${ LABEL } Task type no allowed ${ typeof tasks }`.red);
       }
+    } else if (task.type === 'FUNTION_PROMISE') {
+      cmds.push({ description, type: task.type, action: task.action });
     }
 
     if (tasks.length) {
