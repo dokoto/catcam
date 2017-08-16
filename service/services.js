@@ -33,6 +33,7 @@ module.exports = class Services {
     this.app = express();
     this.globalSettings();
     this.sessionSettings();
+    this.passportSettings();
     if (this.options.mocks) {
       this.mocksEndPoints();
     } else {
@@ -135,7 +136,6 @@ module.exports = class Services {
   endPoints() {
     this.app.get('/login', this.login.bind(this));
     this.app.get('/logout', this.logout.bind(this));
-    this.app.get('/auth/google', this.authGoogle.bind(this));
     this.app.get('/info', this.ensureAuthenticated.bind(this), this.info.bind(this));
     this.app.get(
       '/auth/google',

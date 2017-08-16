@@ -13,7 +13,7 @@ const imgPath = path.join(__dirname, '../app/assets/img');
 const fontsPath = path.join(__dirname, '../app/assets/fonts');
 const buildPath = path.join(__dirname, '../build/web');
 const sourcePath = path.join(__dirname, '../app');
-Conf.ENV.loc = Object.keys(ifs)
+Conf.ENV.loc = Conf.ENV.loc || Object.keys(ifs)
   .map(x => ifs[x].filter(y => y.family === 'IPv4' && !y.internal)[0])
   .filter(z => z)[0].address;
 
@@ -76,7 +76,7 @@ module.exports = env => {
       PLATFORM: JSON.stringify(env.platform),
       VERSION: JSON.stringify(env.version),
       REST_API: REST_API,
-      LANGUAJE: JSON.stringify(env.lang),
+      LANGUAJE: JSON.stringify(env.languaje),
       'process.env': {
         NODE_ENV: env.target === 'dev'
           ? JSON.stringify('development')

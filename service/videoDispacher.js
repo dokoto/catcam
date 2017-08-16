@@ -1,6 +1,5 @@
 const spawn = require('child_process').spawn;
 const os = require('os');
-const ws = require('socket.io')();
 const FFMPEG = require('./responses/GET/ffmpeg');
 
 const LABEL = 'VIDEO-DISPACHER';
@@ -10,14 +9,15 @@ module.exports = class VideoDispacher {
   constructor(options) {
     [this.ip, this.port, this.web_ip, this.web_port, this.channel] = options;
     this.childProcess = null;
+    this.ws = require('socket.io')();
     this.ffmpegCmd = os.platform() === 'win32' ? FFMPEG.webm.win : FFMPEG.webm.linux;
     this.connecting = false;
   }
 
   listen() {
     console.log(`[${ LABEL }] ws://${ this.ip }:${ this.port }/`);
-    ws.on('connection', this.onConnection.bind(this));
-    ws.listen(this.port);
+    this.ws.on('connection', this.onConnection.bind(this));
+    this.ws.listen(this.port);
   }
 
   onConnection(sockConn) {
@@ -45,17 +45,17 @@ module.exports = class VideoDispacher {
 
     if (this.childProcess) {
       console.log(`[${ LABEL }] FFMPEG killing pid ${ this.childProcess.pid }`);
-      ws.to(this.channel).emit('new:user');
+      this.ws.to(this.channel).emit('new:user');
       this.childProcess.kill('SIGKILL');
       setTimeout(() => {
         console.log(`[${ LABEL }] FFMPEG pid ${ this.childProcess.pid } killed`);
-        ws.to(this.channel).emit('joined');
-        ws.to(this.channel).emit('camera:down');
+        this.ws.to(this.channel).emit('joined');
+        this.ws.to(this.channel).emit('camera:down');
         this.childProcess = null;
       }, RECONNECTION_MS);
     } else {
-      ws.to(this.channel).emit('joined');
-      ws.to(this.channel).emit('camera:down');
+      this.ws.to(this.channel).emit('joined');
+      this.ws.to(this.channel).emit('camera:down');
     }
   }
 
@@ -76,19 +76,19 @@ module.exports = class VideoDispacher {
       this.ffmpegCmd.splice(this.ffmpegCmd.indexOf('-video_size') + 1, 1);
       this.ffmpegCmd.splice(this.ffmpegCmd.length - 1);
       console.log(`[${ LABEL }] FFMPEG PID: ${ this.childProcess.pid }`);
-      ws.to(this.channel).emit('started');
+      this.ws.to(this.channel).emit('started');
     }
   }
 
   onDisconnect(sockConn) {
     console.log(`[${ LABEL }][DISCONNECT] Client disconnected`);
     if (this.childProcess) {
-      ws.to(this.channel).emit('disconnected');
+      this.ws.to(this.channel).emit('disconnected');
       const pid = this.childProcess.pid;
       this.childProcess.kill('SIGKILL');
       setTimeout(() => {
         console.log(`[${ LABEL }] FFMPEG pid ${ pid } killed`);
-        ws.to(this.channel).emit('camera:down');
+        this.ws.to(this.channel).emit('camera:down');
         this.childProcess = null;
       }, RECONNECTION_MS);
     }
